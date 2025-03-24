@@ -60,21 +60,67 @@ type SchemaAttribute struct {
 	// The following fields are not part of the original schema but are added for ease of use
 	ResourceOrDataSourceName string `json:"resource_or_data_source_name,omitempty"`
 	AttributePath            string `json:"attribute_path,omitempty"`
-	Description              string `json:"description,omitempty"`
+	Content                  string `json:"content,omitempty"`
+	description              string
 
 	PossibleValues []string `json:"possible_values,omitempty"`
 
 	// Block specifics
 	NestingMode NestingMode                 `json:"nesting_mode,omitempty"`
 	Fields      map[string]*SchemaAttribute `json:"fields,omitempty"`
+	sortOrder   string
+}
+
+func (b *SchemaAttribute) GetAutoCompletePossibleValues() []string {
+	switch b.AttributeType {
+	case cty.String:
+		possibleValues := make([]string, 0, len(b.PossibleValues))
+		for _, value := range b.PossibleValues {
+			possibleValues = append(possibleValues, fmt.Sprintf(`"%s"`, value))
+		}
+
+		return possibleValues
+	default:
+		return b.PossibleValues
+	}
+}
+
+func (b *SchemaAttribute) SetSortOrder(order string) {
+	b.sortOrder = order
+}
+
+func (b *SchemaAttribute) GetSortOrder() string {
+	return b.sortOrder
 }
 
 func (b *SchemaAttribute) GetDescription() string {
-	if b.Description == "" {
+	if b.description != "" {
+		return b.description
+	}
+
+	if b.Content == "" {
 		return "UnDocumented"
 	}
 
-	return b.Description
+	parts := strings.SplitN(b.Content, "-", 2)
+	if len(parts) < 2 {
+		return b.Content
+	}
+
+	description := strings.TrimSpace(parts[1])
+
+	possibleTypesPrefix := []string{"Optional", "Required", "(Optional)", "(Required)"}
+	for _, prefix := range possibleTypesPrefix {
+		if strings.HasPrefix(description, prefix) {
+			description = strings.TrimPrefix(description, prefix)
+			description = strings.TrimSpace(description)
+			break
+		}
+	}
+
+	b.description = description
+
+	return description
 }
 
 func (b *SchemaAttribute) GetAttributeDocLink(parentLink string) string {
@@ -88,5 +134,29 @@ func (b *SchemaAttribute) GetAttributeDocLink(parentLink string) string {
 }
 
 func (b *SchemaAttribute) GetGitHubIssueLink() string {
-	return fmt.Sprintf(GitHubIssuesURL, b.ResourceOrDataSourceName+b.AttributePath)
+	return fmt.Sprintf(GitHubIssuesURL, b.ResourceOrDataSourceName+"."+b.AttributePath)
+}
+
+func (b *SchemaAttribute) GetDetails() []string {
+	var details []string
+	if b.Default != nil {
+		details = append(details, fmt.Sprintf("- **Default:** `%v`", b.Default))
+	}
+	if len(b.PossibleValues) > 0 {
+		details = append(details, fmt.Sprintf("- **Possible Values:** `%v`", strings.Join(b.PossibleValues, "`, `")))
+	}
+
+	return details
+}
+
+func (b *SchemaAttribute) GetRequirementType() string {
+	var requirementBadge string
+	switch {
+	case b.Required:
+		requirementBadge = "required"
+	case b.Optional:
+		requirementBadge = "optional"
+	}
+
+	return requirementBadge
 }

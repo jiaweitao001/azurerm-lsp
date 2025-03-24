@@ -11,12 +11,12 @@ import (
 type TerraformObjects map[string]*TerraformObject
 
 type TerraformObject struct {
-	Name        string                             `json:"name"`
-	Fields      map[string]*schema.SchemaAttribute `json:"fields"`
-	ExampleHCL  string                             `json:"example_hcl"`
-	Timeouts    *model.Timeouts                    // nil if no timeouts part in document
-	Import      model.Import
-	Description string
+	Name       string                             `json:"name"`
+	Fields     map[string]*schema.SchemaAttribute `json:"fields"`
+	ExampleHCL string                             `json:"example_hcl"`
+	Timeouts   *model.Timeouts
+	Import     model.Import
+	Details    string `json:"details"` // Start from first h2 header (after description)
 }
 
 func (b *TerraformObject) GetName() string {
@@ -47,4 +47,8 @@ func (b *TerraformObject) GetSnippet() string {
 	snippet = strings.TrimSuffix(snippet, "```")
 	snippet = strings.TrimSuffix(snippet, "\n")
 	return strings.TrimSpace(snippet)
+}
+
+func (b *TerraformObject) GetDocContent() string {
+	return b.Details
 }

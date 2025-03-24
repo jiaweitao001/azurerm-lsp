@@ -120,14 +120,6 @@ func (svc *service) Assigner() (jrpc2.Assigner, error) {
 			ctx = lsctx.WithDiagnosticsNotifier(ctx, svc.diagsNotifier)
 			return handle(ctx, req, lh.TextDocumentDidOpen)
 		},
-		"textDocument/didClose": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
-			err := session.CheckInitializationIsConfirmed()
-			if err != nil {
-				return nil, err
-			}
-			ctx = lsctx.WithDocumentStorage(ctx, svc.fs)
-			return handle(ctx, req, TextDocumentDidClose)
-		},
 		"textDocument/didSave": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
 			err := session.CheckInitializationIsConfirmed()
 			if err != nil {
@@ -137,6 +129,14 @@ func (svc *service) Assigner() (jrpc2.Assigner, error) {
 			ctx = lsctx.WithDiagnosticsNotifier(ctx, svc.diagsNotifier)
 
 			return handle(ctx, req, lh.TextDocumentDidSave)
+		},
+		"textDocument/didClose": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
+			err := session.CheckInitializationIsConfirmed()
+			if err != nil {
+				return nil, err
+			}
+			ctx = lsctx.WithDocumentStorage(ctx, svc.fs)
+			return handle(ctx, req, TextDocumentDidClose)
 		},
 		"textDocument/completion": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
 			err := session.CheckInitializationIsConfirmed()
@@ -162,30 +162,6 @@ func (svc *service) Assigner() (jrpc2.Assigner, error) {
 			ctx = lsctx.WithTelemetry(ctx, svc.telemetry)
 
 			return handle(ctx, req, svc.HandleHover)
-		},
-		"textDocument/codeAction": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
-			err := session.CheckInitializationIsConfirmed()
-			if err != nil {
-				return nil, err
-			}
-
-			ctx = ilsp.WithClientCapabilities(ctx, cc)
-			ctx = lsctx.WithDocumentStorage(ctx, svc.fs)
-
-			return handle(ctx, req, lh.TextDocumentCodeAction)
-		},
-		"workspace/executeCommand": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
-			err := session.CheckInitializationIsConfirmed()
-			if err != nil {
-				return nil, err
-			}
-
-			ctx = lsctx.WithClientCaller(ctx, svc.clientCaller)
-			ctx = lsctx.WithClientNotifier(ctx, svc.clientNotifier)
-			ctx = lsctx.WithDocumentStorage(ctx, svc.fs)
-			ctx = lsctx.WithTelemetry(ctx, svc.telemetry)
-
-			return handle(ctx, req, svc.WorkspaceExecuteCommand)
 		},
 		"shutdown": func(ctx context.Context, req *jrpc2.Request) (interface{}, error) {
 			err := session.Shutdown(req)

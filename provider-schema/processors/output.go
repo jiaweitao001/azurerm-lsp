@@ -1,35 +1,19 @@
 package processors
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
 )
 
-// ProcessOutput combines schema and markdown outputs and saves the result to a file
-func ProcessOutput(providerPath, gitBranch, outputFile string) (TerraformObjects, error) {
-	//// if outputFile already exists, try to read it and use that instead
-	//if _, err := os.Stat(outputFile); err == nil {
-	//	// File exists, read it
-	//	data, err := os.ReadFile(outputFile)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("error reading existing output file: %v", err)
-	//	}
-	//
-	//	var existingOutput TerraformObjects
-	//	err = json.Unmarshal(data, &existingOutput)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("error unmarshaling existing output file: %v", err)
-	//	}
-	//
-	//	fmt.Printf("Using existing output from %s\n", outputFile)
-	//	return existingOutput, nil
-	//} else if !os.IsNotExist(err) {
-	//	return nil, fmt.Errorf("error checking output file: %v", err)
-	//}
-	//
-	//fmt.Printf("Output file %s does not exist, generating new output...\n", outputFile)
+const outputFileName = "combined_output.json"
 
+//go:embed combined_output.json
+var combinedOutputJSON []byte
+
+// ProcessOutput combines schema and markdown outputs and saves the result to a file
+func ProcessOutput(providerPath, gitBranch, outputDir string) (TerraformObjects, error) {
 	// Step 1: Generate schema
 	schemaOutput, err := ProcessSchema(providerPath, gitBranch)
 	if err != nil {
@@ -55,11 +39,23 @@ func ProcessOutput(providerPath, gitBranch, outputFile string) (TerraformObjects
 	}
 
 	// Step 5: Write combined output to a file
-	err = os.WriteFile(outputFile, jsonOutput, 0644)
+	err = os.WriteFile(outputDir+"/"+outputFileName, jsonOutput, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("error writing combined output to file: %v", err)
 	}
 
-	fmt.Printf("Combined output successfully written to %s\n", outputFile)
+	fmt.Printf("Combined output successfully written to %s\n", outputFileName)
 	return combinedOutput, nil
+}
+
+func LoadProcessedOutput() (TerraformObjects, error) {
+	var terraformObjects TerraformObjects
+
+	// Unmarshal the combined output JSON into the terraformObjects variable
+	err := json.Unmarshal(combinedOutputJSON, &terraformObjects)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling combined output JSON: %v", err)
+	}
+
+	return terraformObjects, nil
 }

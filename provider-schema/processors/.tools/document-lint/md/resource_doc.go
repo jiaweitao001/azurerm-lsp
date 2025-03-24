@@ -148,10 +148,6 @@ func extractFieldFromLine(line string) (field *model.Field) {
 				field.Skip = true
 			}
 		}
-		if len(enums) == 0 && strings.Index(res[3], "`") > 0 {
-			guessValues := codeReg.FindAllString(res[3], -1)
-			field.SetGuessEnums(guessValues)
-		}
 	}
 	field.AddEnum(enums...)
 	return field

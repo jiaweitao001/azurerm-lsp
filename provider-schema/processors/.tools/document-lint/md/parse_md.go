@@ -141,6 +141,8 @@ func newMarkFromString(content string, filepath string) *Mark {
 		Fields:   map[string]*model.Field{},
 	}
 
+	exampleHCLRecorded := false
+
 	idx := 0
 	for idx < len(lines) {
 		line := lines[idx]
@@ -166,10 +168,26 @@ func newMarkFromString(content string, filepath string) *Mark {
 				}
 			}
 		case strings.HasPrefix(line, "```hcl"):
-			// keep going and add all lines until the end of code block
-			for idx < len(lines) && !strings.HasPrefix(strings.TrimSpace(lines[idx]), "```") {
-				result.addLineOrItem(idx, line, ItemExample)
+			if exampleHCLRecorded {
+				result.addItem(NewMarkItem(idx, line, ItemPlainText))
 				idx++
+				continue
+			}
+
+			// keep going and add all lines until the end of code block
+			exampleHCLRecorded = true
+			result.addItem(NewMarkItem(idx, line, ItemExample))
+			idx++
+
+			for idx < len(lines) && !strings.HasPrefix(strings.TrimSpace(lines[idx]), "```") {
+				last := result.lastItem()
+				last.addLine(idx, lines[idx])
+				idx++
+			}
+
+			if idx < len(lines) {
+				last := result.lastItem()
+				last.addLine(idx, lines[idx])
 			}
 		case strings.HasPrefix(line, "->"), strings.HasPrefix(line, "~>"):
 			result.addItemWith(idx, line, ItemNote)
@@ -384,7 +402,9 @@ func (m *Mark) BuildResourceDoc() *model.ResourceDoc {
 	}
 
 	doc.ResourceName = m.ResourceType
-	doc.Description = m.Description
+	if m.content != nil {
+		doc.Content = *m.content
+	}
 	for _, item := range m.Items {
 		if item.Type == ItemExample {
 			doc.ExampleHCL = item.content()

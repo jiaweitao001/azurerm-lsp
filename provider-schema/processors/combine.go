@@ -29,13 +29,38 @@ func CombineSchemaAndMarkdown(providerSchema *schema.ProviderSchema, markdownDoc
 		terraformObject.ExampleHCL = markdownDoc.ExampleHCL
 		terraformObject.Timeouts = markdownDoc.Timeouts
 		terraformObject.Import = markdownDoc.Import
-		terraformObject.Description = markdownDoc.Description
+		terraformObject.Details = extractDetails(markdownDoc.Content)
 
 		// Inject descriptions from markdown into the providerSchema fields
 		combineFieldsRecursively(name, resourceSchema.Block, markdownDoc.AllProp(), terraformObject.Fields, "")
 	}
 
 	return terraformObjects, nil
+}
+
+func extractDetails(content string) string {
+	lines := strings.Split(content, "\n")
+	for i, line := range lines {
+		if strings.HasPrefix(line, "#") {
+			lines = lines[i:]
+			break
+		}
+	}
+
+	if len(lines) > 0 {
+		// remove the first line (the resource name)
+		lines = lines[1:]
+	}
+
+	if len(lines) > 0 {
+		// remove empty lines at the beginning
+		curFirstLine := strings.TrimSpace(lines[0])
+		if curFirstLine == "" || curFirstLine == "\n" {
+			lines = lines[1:]
+		}
+	}
+
+	return strings.Join(lines, "\n")
 }
 
 // combineFieldsRecursively recursively combines fields from the schema and markdown properties.
@@ -50,7 +75,7 @@ func combineFieldsRecursively(resourceName string, schemaBlock *schema.SchemaBlo
 			markdownField := markdownProps[fieldName]
 
 			if markdownField != nil {
-				schemaField.Description = getDescription(markdownField.Content)
+				schemaField.Content = getDescription(markdownField.Content)
 				schemaField.PossibleValues = markdownField.PossibleValues()
 			} else {
 				fmt.Printf("(TerraformObject %s) Field not found in documentation: %s\n", resourceName, schemaField.AttributePath)
@@ -83,7 +108,7 @@ func combineFieldsRecursively(resourceName string, schemaBlock *schema.SchemaBlo
 			markdownBlockProps := markdownProps.FindAllSubBlock(blockName)
 			if len(markdownBlockProps) > 0 {
 				// Use the first field's description as the block description
-				combinedBlockField.Description = getDescription(markdownBlockProps[0].Content)
+				combinedBlockField.Content = getDescription(markdownBlockProps[0].Content)
 				combinedBlockField.PossibleValues = markdownBlockProps[0].PossibleValues()
 
 				// Inject descriptions for nested attributes

@@ -2,25 +2,18 @@ package provider_schema
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/Azure/azurerm-lsp/provider-schema/azurerm/schema"
 	"github.com/Azure/azurerm-lsp/provider-schema/processors"
 )
 
-func Run() (processors.TerraformObjects, error) {
-	providerPath := "/Users/harryqu/Projects-m/terraform-m"
-	gitBranch := "main"
-	outputFile := "combined_output.json"
-
-	return processors.ProcessOutput(providerPath, gitBranch, outputFile)
-}
-
 var finalTerraformObject processors.TerraformObjects
 
 func GetFinalTerraformObject() processors.TerraformObjects {
 	if finalTerraformObject == nil {
-		terraformObject, err := Run()
+		terraformObject, err := processors.LoadProcessedOutput()
 		if err != nil {
 			panic(err)
 		}
@@ -125,35 +118,59 @@ func GetPossibleValuesForProperty(objectName, propertyName string) ([]string, er
 		return nil, fmt.Errorf("no possible values found for block '%s' in resource/data source '%s'", propertyName, objectName)
 	}
 
-	return block.PossibleValues, nil
+	return block.GetAutoCompletePossibleValues(), nil
 }
 
-func ListDirectProperties(objectName string) ([]*schema.SchemaAttribute, error) {
+func ListDirectProperties(objectName string, path string) ([]*schema.SchemaAttribute, error) {
 	resource, exists := GetFinalTerraformObject()[objectName]
 	if !exists {
 		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
 	}
+	fields := resource.Fields
+
+	if path != "" {
+		block, err := NavigateToNestedBlock(objectName, path)
+		if err != nil {
+			return nil, err
+		}
+
+		if block == nil {
+			return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", path, objectName)
+		}
+
+		fields = block.Fields
+	}
 
 	var properties []*schema.SchemaAttribute
-	for _, property := range resource.Fields {
+	for _, property := range fields {
+		if property.Computed {
+			continue
+		}
+
 		properties = append(properties, property)
 	}
+
+	setSort(properties)
 
 	return properties, nil
 }
 
-func ListDirectPropertiesForBlockPath(objectName, blockPath string) ([]*schema.SchemaAttribute, error) {
-	block, err := NavigateToNestedBlock(objectName, blockPath)
-	if err != nil {
-		return nil, err
-	}
+func setSort(properties []*schema.SchemaAttribute) {
+	slices.SortFunc(properties, func(a, b *schema.SchemaAttribute) int {
+		if a.Required && !b.Required {
+			return -1
+		}
+		if !a.Required && b.Required {
+			return 1
+		}
+		return strings.Compare(a.Name, b.Name)
+	})
 
-	var properties []*schema.SchemaAttribute
-	for _, property := range block.Fields {
-		properties = append(properties, property)
+	sortIndex := 0
+	for _, property := range properties {
+		property.SetSortOrder(fmt.Sprintf("%d", sortIndex))
+		sortIndex++
 	}
-
-	return properties, nil
 }
 
 func GetSnippet(objectName string) (string, error) {
@@ -165,11 +182,57 @@ func GetSnippet(objectName string) (string, error) {
 	return resource.GetSnippet(), nil
 }
 
-func GetResourceOrDataSourceDocLink(objectName string) string {
-	resource, exists := GetFinalTerraformObject()[objectName]
-	if !exists {
+func GetPropertyDocContent(objectName string, property *schema.SchemaAttribute) string {
+	if property == nil {
 		return ""
 	}
 
-	return resource.GetResourceOrDataSourceDocLink()
+	propertyDescription := property.GetDescription()
+
+	// try to get direct properties of this property
+	directProperties, err := ListDirectProperties(objectName, property.AttributePath)
+	if err != nil || len(directProperties) == 0 {
+		return propertyDescription
+	}
+
+	// if there are direct properties, append them to the description
+	var directPropertiesDescriptions []string
+	for _, directProperty := range directProperties {
+		directPropertiesDescriptions = append(directPropertiesDescriptions, fmt.Sprintf(" - %s: %s", directProperty.Name, directProperty.GetDescription()))
+	}
+
+	return fmt.Sprintf("%s\n\n%s", propertyDescription, strings.Join(directPropertiesDescriptions, "\n"))
+}
+
+func GetResourceContent(resourceName string) (string, bool, error) {
+	resourceInfo, err := GetObjectInfo(resourceName)
+	if err != nil {
+		return "", false, fmt.Errorf("error retrieving resource info: %v", err)
+	}
+	return fmt.Sprintf(ResourceTemplate,
+		resourceName,
+		resourceInfo.GetResourceOrDataSourceDocLink(),
+		resourceInfo.GetGitHubIssueLink(),
+		resourceInfo.GetDocContent(),
+	), resourceInfo.IsDataSource(), nil
+}
+
+func GetAttributeContent(resourceName, path string) (string, error) {
+	obj, err := GetObjectInfo(resourceName)
+	if err != nil {
+		return "", fmt.Errorf("error retrieving object info: %v", err)
+	}
+	prop, err := GetPropertyInfo(resourceName, path)
+	if err != nil {
+		return "", fmt.Errorf("error retrieving property info: %v", err)
+	}
+	return fmt.Sprintf(AttributeTemplate,
+		prop.Name,
+		prop.GetRequirementType(),
+		prop.AttributeType.FriendlyName(),
+		prop.GetAttributeDocLink(obj.GetResourceOrDataSourceDocLink()),
+		prop.GetGitHubIssueLink(),
+		strings.Join(prop.GetDetails(), "\n"),
+		GetPropertyDocContent(resourceName, prop),
+	), nil
 }

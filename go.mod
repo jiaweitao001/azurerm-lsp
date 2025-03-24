@@ -3,12 +3,9 @@ module github.com/Azure/azurerm-lsp
 go 1.22.0
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
 	github.com/apparentlymart/go-textseg v1.0.0
 	github.com/creachadair/jrpc2 v0.32.0
-	github.com/expr-lang/expr v1.16.9
 	github.com/fatih/color v1.17.0
-	github.com/gertd/go-pluralize v0.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/hashicorp/hcl-lang v0.0.0-20211123142056-191cd51dec5b
@@ -22,7 +19,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.1 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
@@ -49,18 +45,20 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/posener/complete v1.2.3 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

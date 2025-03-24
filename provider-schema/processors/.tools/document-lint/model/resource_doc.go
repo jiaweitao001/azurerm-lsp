@@ -252,7 +252,7 @@ type ResourceDoc struct {
 	Blocks map[string]Properties // two pass get all blocks
 
 	PossibleValues map[string]PossibleValue // save a.b.c possible values here
-	Description    string
+	Content        string
 }
 
 func (r *ResourceDoc) SetTimeout(lineNum int, line string) {

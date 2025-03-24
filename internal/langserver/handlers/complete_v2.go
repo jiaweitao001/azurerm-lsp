@@ -3,250 +3,139 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"strings"
-
-	lsctx "github.com/Azure/azurerm-lsp/internal/context"
-	ilsp "github.com/Azure/azurerm-lsp/internal/lsp"
 	"github.com/Azure/azurerm-lsp/internal/parser"
-	lsp "github.com/Azure/azurerm-lsp/internal/protocol"
-	"github.com/Azure/azurerm-lsp/internal/utils"
-	provider_schema "github.com/Azure/azurerm-lsp/provider-schema"
-	"github.com/Azure/azurerm-lsp/provider-schema/azurerm/schema"
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/Azure/azurerm-lsp/internal/protocol"
+	"github.com/Azure/azurerm-lsp/provider-schema"
 )
 
-func (svc *service) HandleComplete(ctx context.Context, params lsp.CompletionParams) ([]lsp.CompletionItem, error) {
-	docContent, docFileName, err := GetDocumentContent(ctx, params.TextDocument.URI)
+func (svc *service) HandleComplete(ctx context.Context, params protocol.CompletionParams) ([]protocol.CompletionItem, error) {
+	docContent, docFileName, err := parser.GetDocumentContent(ctx, params.TextDocument.URI)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get document content: %v", err)
+		return nil, err
 	}
 
-	docContents := strings.Split(docContent, "\n")
-	lineContent, err := getCurrentLineContent(docContents, params.TextDocumentPositionParams.Position.Line)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get current line content: %v", err)
-	}
-
-	file, diags := hclsyntax.ParseConfig([]byte(docContent), docFileName, hcl.InitialPos)
-	if diags != nil && diags.HasErrors() {
-		if utils.MatchAnyPrefix(lineContent, schema.AzureRMPrefix) {
-			return suggestResourcesAndDataSources(params), nil
+	ctxInfo, diags, err := parser.BuildHCLContext(docContent, docFileName, params.Position)
+	if err != nil || (diags != nil && diags.HasErrors()) {
+		docContent, fieldName, isNewBlock, err := parser.AttemptReparse(docContent, params.Position.Line)
+		if err != nil {
+			if isNewBlock {
+				return GetTopLevelCompletions(params), nil
+			}
+			
+			return nil, nil
 		}
 
-		return nil, fmt.Errorf("failed to parse document: %v", diags)
-	}
+		ctxInfo, diags, err = parser.BuildHCLContext(docContent, docFileName, params.Position)
+		if err != nil || (diags != nil && diags.HasErrors()) {
+			return nil, nil
+		}
 
-	hclPos := ilsp.LSPPosToHCL(params.TextDocumentPositionParams.Position)
-	body, isHcl := file.Body.(*hclsyntax.Body)
-	if !isHcl {
-		return nil, fmt.Errorf("file is not HCL")
-	}
+		if ctxInfo.Block != nil || ctxInfo.SubBlock != nil || ctxInfo.Attribute != nil {
+			return GetAttributeCompletions(ctxInfo.Resource, ctxInfo.ParsedPath+"."+fieldName), nil
+		}
 
-	block := parser.BlockAtPos(body, hclPos)
-	if block == nil || len(block.Labels) == 0 || !strings.HasPrefix(block.Labels[0], schema.AzureRMPrefix) {
-		return suggestResourcesAndDataSources(params), nil
+		return GetTopLevelCompletions(params), nil
 	}
-
-	resourceName := block.Labels[0]
-	attribute := parser.AttributeAtPos(block, hclPos)
-	subBlock := parser.BlockAtPos(block.Body, hclPos)
 
 	switch {
-	case attribute != nil:
-		path := buildNestedPath(block, attribute)
-		return completeAttribute(resourceName, path)
-	case subBlock != nil:
-		path := buildNestedPath(block, subBlock)
-		return completeNestedBlock(resourceName, path)
+	case ctxInfo.Attribute != nil:
+		return GetAttributeCompletions(ctxInfo.Resource, ctxInfo.ParsedPath), nil
+	case ctxInfo.SubBlock != nil || ctxInfo.Block != nil:
+		return GetBlockAttributeCompletions(ctxInfo.Resource, ctxInfo.ParsedPath), nil
 	default:
-		return completeTopLevelProperties(resourceName)
+		return GetTopLevelCompletions(params), nil
 	}
 }
 
-func getCurrentLineContent(contents []string, line uint32) (string, error) {
-	if line < 0 || int(line) >= len(contents) {
-		return "", fmt.Errorf("invalid line number")
-	}
-
-	return strings.TrimSpace(contents[line]), nil
-}
-
-func buildNestedPath(topLevelBlock *hclsyntax.Block, targetNode hclsyntax.Node) string {
-	var pathParts []string
-
-	var traverse func(block *hclsyntax.Block, target hclsyntax.Node) bool
-	traverse = func(block *hclsyntax.Block, target hclsyntax.Node) bool {
-		for _, attr := range block.Body.Attributes {
-			if attr == target {
-				pathParts = append(pathParts, attr.Name)
-				return true
-			}
-		}
-
-		for _, nestedBlock := range block.Body.Blocks {
-			if nestedBlock == target {
-				pathParts = append(pathParts, nestedBlock.Type)
-				return true
-			}
-
-			if traverse(nestedBlock, target) {
-				pathParts = append([]string{nestedBlock.Type}, pathParts...)
-				return true
-			}
-		}
-
-		return false
-	}
-
-	if traverse(topLevelBlock, targetNode) {
-		return strings.Join(pathParts, ".")
-	}
-
-	return ""
-}
-
-func completeAttribute(resourceName, path string) ([]lsp.CompletionItem, error) {
-	possibleValues, err := provider_schema.GetPossibleValuesForProperty(resourceName, path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get possible values: %v", err)
-	}
-
-	candidateList := make([]lsp.CompletionItem, 0, len(possibleValues))
-	for _, possibleValue := range possibleValues {
-		candidateList = append(candidateList, lsp.CompletionItem{
-			Label:      "☁️(possible value) " + possibleValue,
-			Kind:       lsp.SnippetCompletion,
-			Detail:     "Code Snippet",
-			InsertText: possibleValue,
-		})
-	}
-
-	return candidateList, nil
-}
-
-func completeNestedBlock(resourceName, path string) ([]lsp.CompletionItem, error) {
-	propertyInfo, err := provider_schema.GetPropertyInfo(resourceName, path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get property info: %v", err)
-	}
-
-	candidateList := make([]lsp.CompletionItem, 0, len(propertyInfo.Fields))
-	for nestedProperty, nestedPropertyInfo := range propertyInfo.Fields {
-		candidateList = append(candidateList, createCompletionItemFromSchemaAttribute(nestedProperty, nestedPropertyInfo))
-	}
-
-	return candidateList, nil
-}
-
-func completeTopLevelProperties(resourceName string) ([]lsp.CompletionItem, error) {
-	properties, err := provider_schema.ListDirectProperties(resourceName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list properties: %v", err)
-	}
-
-	candidateList := make([]lsp.CompletionItem, 0, len(properties))
-	for _, property := range properties {
-		candidateList = append(candidateList, createCompletionItemFromSchemaAttribute(property.Name, property))
-	}
-
-	return candidateList, nil
-}
-
-func suggestResourcesAndDataSources(params lsp.CompletionParams) []lsp.CompletionItem {
+func GetTopLevelCompletions(params protocol.CompletionParams) []protocol.CompletionItem {
 	resources := provider_schema.ListAllResources()
 	dataSources := provider_schema.ListAllDataSources()
-	candidateList := make([]lsp.CompletionItem, 0, len(resources)+len(dataSources))
+	lineRange := getLineRange(params)
 
-	lineRange := getCurrentLineRange(params)
-
-	for _, resource := range resources {
-		snippet, err := provider_schema.GetSnippet(resource)
+	var items []protocol.CompletionItem
+	for _, name := range append(resources, dataSources...) {
+		snippet, err := provider_schema.GetSnippet(name)
 		if err != nil {
 			continue
 		}
 
-		candidateList = append(candidateList, lsp.CompletionItem{
-			Label:            "☁️(resource) " + resource,
-			InsertText:       snippet,
-			InsertTextFormat: lsp.SnippetTextFormat,
-			Kind:             lsp.SnippetCompletion,
-			Detail:           "Resource",
-			TextEdit: &lsp.TextEdit{
-				Range:   lineRange,
-				NewText: snippet,
-			},
-		})
-	}
-
-	for _, dataSource := range dataSources {
-		snippet, err := provider_schema.GetSnippet(dataSource)
+		content, isDataSource, err := provider_schema.GetResourceContent(name)
 		if err != nil {
 			continue
 		}
 
-		candidateList = append(candidateList, lsp.CompletionItem{
-			Label:            "☁️(data source) " + dataSource,
+		kind := "resource"
+		if isDataSource {
+			kind = "data source"
+		}
+
+		items = append(items, protocol.CompletionItem{
+			Label:            fmt.Sprintf("☁️(%s) %s", kind, name),
 			InsertText:       snippet,
-			InsertTextFormat: lsp.SnippetTextFormat,
-			Kind:             lsp.SnippetCompletion,
-			Detail:           "Data Source",
-			TextEdit: &lsp.TextEdit{
+			InsertTextFormat: protocol.SnippetTextFormat,
+			Kind:             protocol.SnippetCompletion,
+			Detail:           "AzureRM " + kind,
+			TextEdit: &protocol.TextEdit{
 				Range:   lineRange,
 				NewText: snippet,
 			},
+			Documentation: protocol.MarkupContent{
+				Kind:  protocol.Markdown,
+				Value: content,
+			},
+		})
+	}
+	return items
+}
+
+func GetBlockAttributeCompletions(resourceName, path string) []protocol.CompletionItem {
+	props, err := provider_schema.ListDirectProperties(resourceName, path)
+	if err != nil {
+		return nil
+	}
+
+	var items []protocol.CompletionItem
+	for _, p := range props {
+		content, err := provider_schema.GetAttributeContent(resourceName, p.AttributePath)
+		if err != nil {
+			continue
+		}
+
+		items = append(items, protocol.CompletionItem{
+			Label:      "☁️(property) " + p.Name,
+			Kind:       protocol.SnippetCompletion,
+			SortText:   p.GetSortOrder(),
+			Detail:     "Property Info",
+			InsertText: p.Name,
+			Documentation: protocol.MarkupContent{
+				Kind:  protocol.Markdown,
+				Value: content,
+			},
+		})
+	}
+	return items
+}
+
+func GetAttributeCompletions(resourceName, path string) []protocol.CompletionItem {
+	values, err := provider_schema.GetPossibleValuesForProperty(resourceName, path)
+	if err != nil {
+		return nil
+	}
+
+	items := make([]protocol.CompletionItem, 0, len(values))
+	for _, val := range values {
+		items = append(items, protocol.CompletionItem{
+			Label:      "☁️(value) " + val,
+			Kind:       protocol.SnippetCompletion,
+			InsertText: val,
 		})
 	}
 
-	return candidateList
+	return items
 }
 
-func createCompletionItemFromSchemaAttribute(name string, attr *schema.SchemaAttribute) lsp.CompletionItem {
-	label := fmt.Sprintf("☁️(property) %s (%s)", name, attr.AttributeType.FriendlyName())
-	if attr.Required {
-		label += " (required)"
-	} else if attr.Optional {
-		label += " (optional)"
-	} else if attr.Computed {
-		label += " (computed)"
-	}
-
-	if attr.Default != nil {
-		label += fmt.Sprintf(" (default: %v)", attr.Default)
-	}
-
-	label += fmt.Sprintf(" (%s)", attr.Description)
-
-	return lsp.CompletionItem{
-		Label:      label,
-		Kind:       lsp.SnippetCompletion,
-		InsertText: name,
-	}
-}
-
-func GetDocumentContent(ctx context.Context, documentURI lsp.DocumentURI) (string, string, error) {
-	fs, err := lsctx.DocumentStorage(ctx)
-	if err != nil {
-		return "", "", err
-	}
-
-	doc, err := fs.GetDocument(ilsp.FileHandlerFromDocumentURI(documentURI))
-	if err != nil {
-		return "", "", fmt.Errorf("failed to get document: %v", err)
-	}
-
-	data, err := doc.Text()
-	if err != nil {
-		return "", "", fmt.Errorf("failed to get document text: %v", err)
-	}
-
-	return string(data), doc.Filename(), nil
-}
-
-func getCurrentLineRange(params lsp.CompletionParams) lsp.Range {
-	line := params.TextDocumentPositionParams.Position.Line
-	return lsp.Range{
-		Start: lsp.Position{Line: line, Character: 0},
-		End:   lsp.Position{Line: line, Character: 1000}, // Use a large number to cover the entire line
-	}
+func getLineRange(params protocol.CompletionParams) protocol.Range {
+	start := protocol.Position{Line: params.Position.Line, Character: 0}
+	end := params.Position
+	return protocol.Range{Start: start, End: end}
 }

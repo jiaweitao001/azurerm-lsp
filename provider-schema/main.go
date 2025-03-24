@@ -8,9 +8,7 @@ import (
 	"github.com/Azure/azurerm-lsp/provider-schema/processors"
 )
 
-func main() {
-	providerPath := "/Users/harryqu/Projects-m/terraform-m"
-	gitBranch := "main"
+func GenerateProviderSchema(providerPath, gitBranch string) {
 	dirPath := os.Getenv("PWD") + "/provider-schema"
 
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("%s/processors/.tools/generate-provider-schema/run.sh %s %s", dirPath, providerPath, gitBranch))
@@ -23,9 +21,15 @@ func main() {
 		return
 	}
 
-	_, err = processors.ProcessOutput(providerPath, gitBranch, "combined_output.json")
+	_, err = processors.ProcessOutput(providerPath, gitBranch, dirPath+"/processors")
 	if err != nil {
 		fmt.Printf("Error processing output: %v\n", err)
+		return
+	}
+
+	_, err = processors.LoadProcessedOutput()
+	if err != nil {
+		fmt.Printf("Error loading processed output: %v\n", err)
 		return
 	}
 }

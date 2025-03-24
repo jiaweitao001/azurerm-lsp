@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/Azure/azurerm-lsp/internal/filesystem"
-	"github.com/Azure/azurerm-lsp/internal/langserver/handlers/complete"
 	"github.com/Azure/azurerm-lsp/internal/logging"
 	ilsp "github.com/Azure/azurerm-lsp/internal/lsp"
 	lsp "github.com/Azure/azurerm-lsp/internal/protocol"
@@ -108,9 +107,13 @@ func (c *CompletionCommand) Run(args []string) int {
 		c.Ui.Error(err.Error())
 		return 1
 	}
-	candidates := complete.CandidatesAtPos(src, doc.Filename(), pos, logger)
 
-	c.Ui.Output(fmt.Sprintf("%#v", candidates))
+	fmt.Println("src:", src)
+	fmt.Println("pos:", pos)
+	// TODO: add completion
+	//candidates := complete.CandidatesAtPos(src, doc.Filename(), pos, logger)
+
+	//c.Ui.Output(fmt.Sprintf("%#v", candidates))
 	return 0
 }
 

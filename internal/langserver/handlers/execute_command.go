@@ -20,8 +20,6 @@ func availableCommands() []string {
 
 func init() {
 	handlerMap = make(map[string]command.CommandHandler)
-	handlerMap[CommandConvertJsonToazurerm] = command.ConvertJsonCommand{}
-	handlerMap[CommandAztfMigrate] = nil // TODO: command.AztfMigrateCommand{}
 	handlerMap[CommandTelemetry] = command.TelemetryCommand{}
 }
 

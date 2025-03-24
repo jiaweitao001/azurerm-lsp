@@ -9,6 +9,5 @@ import (
 var runScript embed.FS
 
 func ProcessSchema(providerPath, gitBranch string) (*schema.ProviderSchema, error) {
-
 	return &schema.ProviderSchemaInfo, nil
 }

@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 
-	"github.com/Azure/azurerm-lsp/internal/azure"
 	lsctx "github.com/Azure/azurerm-lsp/internal/context"
 	ilsp "github.com/Azure/azurerm-lsp/internal/lsp"
 	lsp "github.com/Azure/azurerm-lsp/internal/protocol"
@@ -20,6 +19,7 @@ func (svc *service) Initialize(ctx context.Context, params lsp.InitializeParams)
 			CompletionProvider: lsp.CompletionOptions{
 				ResolveProvider: false,
 				TriggerCharacters: []string{
+					"",
 					` `,
 					`.`,
 					`/`,
@@ -28,12 +28,9 @@ func (svc *service) Initialize(ctx context.Context, params lsp.InitializeParams)
 					`"`,
 				},
 			},
-			CodeActionProvider: lsp.CodeActionOptions{
-				CodeActionKinds: ilsp.SupportedCodeActions.AsSlice(),
-				ResolveProvider: false,
-			},
 			HoverProvider: true,
 
+			CodeActionProvider:         false,
 			DeclarationProvider:        false,
 			DefinitionProvider:         false,
 			CodeLensProvider:           nil,
@@ -42,13 +39,7 @@ func (svc *service) Initialize(ctx context.Context, params lsp.InitializeParams)
 			DocumentSymbolProvider:     false,
 			WorkspaceSymbolProvider:    false,
 			Workspace:                  nil,
-
-			ExecuteCommandProvider: &lsp.ExecuteCommandOptions{
-				Commands: availableCommands(),
-				WorkDoneProgressOptions: lsp.WorkDoneProgressOptions{
-					WorkDoneProgress: true,
-				},
-			},
+			ExecuteCommandProvider:     nil,
 		},
 	}
 
@@ -97,7 +88,5 @@ func (svc *service) Initialize(ctx context.Context, params lsp.InitializeParams)
 		})
 	}
 
-	// initialize embedded azurerm schema
-	azure.GetAzureSchema()
 	return serverCaps, nil
 }

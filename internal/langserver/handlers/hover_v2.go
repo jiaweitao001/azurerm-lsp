@@ -33,7 +33,7 @@ func (svc *service) HandleHover(ctx context.Context, params protocol.TextDocumen
 
 	switch {
 	case ctxInfo.ParsedPath != "" && (ctxInfo.SubBlock != nil || ctxInfo.Attribute != nil):
-		content, err = provider_schema.GetAttributeContent(ctxInfo.Resource, ctxInfo.ParsedPath)
+		content, _, err = provider_schema.GetAttributeContent(ctxInfo.Resource, ctxInfo.ParsedPath)
 	default:
 		content, _, err = provider_schema.GetResourceContent(ctxInfo.Resource)
 	}

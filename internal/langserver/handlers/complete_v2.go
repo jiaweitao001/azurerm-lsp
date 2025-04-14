@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/Azure/azurerm-lsp/internal/parser"
 	"github.com/Azure/azurerm-lsp/internal/protocol"
+	"github.com/Azure/azurerm-lsp/internal/utils"
 	"github.com/Azure/azurerm-lsp/provider-schema"
+	"github.com/Azure/azurerm-lsp/provider-schema/azurerm/schema"
 )
 
 func (svc *service) HandleComplete(ctx context.Context, params protocol.CompletionParams) ([]protocol.CompletionItem, error) {
@@ -21,12 +23,16 @@ func (svc *service) HandleComplete(ctx context.Context, params protocol.Completi
 			if isNewBlock {
 				return GetTopLevelCompletions(params), nil
 			}
-			
+
 			return nil, nil
 		}
 
 		ctxInfo, diags, err = parser.BuildHCLContext(docContent, docFileName, params.Position)
 		if err != nil || (diags != nil && diags.HasErrors()) {
+			if utils.MatchAnyPrefix(fieldName, schema.AzureRMPrefix, schema.ResourcesPrefix) {
+				return GetTopLevelCompletions(params), nil
+			}
+
 			return nil, nil
 		}
 
@@ -96,13 +102,13 @@ func GetBlockAttributeCompletions(resourceName, path string) []protocol.Completi
 
 	var items []protocol.CompletionItem
 	for _, p := range props {
-		content, err := provider_schema.GetAttributeContent(resourceName, p.AttributePath)
-		if err != nil {
+		content, prop, err := provider_schema.GetAttributeContent(resourceName, p.AttributePath)
+		if err != nil || prop == nil {
 			continue
 		}
 
 		items = append(items, protocol.CompletionItem{
-			Label:      "☁️(property) " + p.Name,
+			Label:      fmt.Sprintf("☁️(property) %s (%s)", p.Name, prop.GetRequirementType()),
 			Kind:       protocol.SnippetCompletion,
 			SortText:   p.GetSortOrder(),
 			Detail:     "Property Info",

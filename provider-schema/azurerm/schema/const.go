@@ -6,10 +6,12 @@ const (
 	Resources         = "resources"
 	DataSources       = "data-sources"
 	AzureRMPrefix     = "azurerm_"
+	ResourcesPrefix   = "resource"
+	DataSourcesPrefix = "data"
 )
 
 const (
-	DataSourcePrefix = "datasource#"
+	InputDataSourcePrefix = "datasource#"
 )
 
 const (

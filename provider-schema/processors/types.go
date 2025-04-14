@@ -20,11 +20,11 @@ type TerraformObject struct {
 }
 
 func (b *TerraformObject) GetName() string {
-	return strings.TrimPrefix(b.Name, schema.DataSourcePrefix)
+	return strings.TrimPrefix(b.Name, schema.InputDataSourcePrefix)
 }
 
 func (b *TerraformObject) IsDataSource() bool {
-	return strings.HasPrefix(b.Name, schema.DataSourcePrefix)
+	return strings.HasPrefix(b.Name, schema.InputDataSourcePrefix)
 }
 
 func (b *TerraformObject) GetResourceOrDataSourceDocLink() string {

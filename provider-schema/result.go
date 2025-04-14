@@ -217,14 +217,14 @@ func GetResourceContent(resourceName string) (string, bool, error) {
 	), resourceInfo.IsDataSource(), nil
 }
 
-func GetAttributeContent(resourceName, path string) (string, error) {
+func GetAttributeContent(resourceName, path string) (string, *schema.SchemaAttribute, error) {
 	obj, err := GetObjectInfo(resourceName)
 	if err != nil {
-		return "", fmt.Errorf("error retrieving object info: %v", err)
+		return "", nil, fmt.Errorf("error retrieving object info: %v", err)
 	}
 	prop, err := GetPropertyInfo(resourceName, path)
 	if err != nil {
-		return "", fmt.Errorf("error retrieving property info: %v", err)
+		return "", nil, fmt.Errorf("error retrieving property info: %v", err)
 	}
 	return fmt.Sprintf(AttributeTemplate,
 		prop.Name,
@@ -234,5 +234,5 @@ func GetAttributeContent(resourceName, path string) (string, error) {
 		prop.GetGitHubIssueLink(),
 		strings.Join(prop.GetDetails(), "\n"),
 		GetPropertyDocContent(resourceName, prop),
-	), nil
+	), prop, nil
 }

@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"github.com/Azure/azurerm-lsp/internal/lsp"
 
+	"github.com/Azure/azurerm-lsp/internal/lsp"
 	"github.com/Azure/azurerm-lsp/internal/parser"
 	"github.com/Azure/azurerm-lsp/internal/protocol"
 	provider_schema "github.com/Azure/azurerm-lsp/provider-schema"
@@ -66,7 +66,7 @@ func (svc *service) HandleHover(ctx context.Context, params protocol.TextDocumen
 
 	pos := lsp.LSPPosToHCL(params.Position)
 	// Only show hover if position is within the key range
-	if pos.Line < keyRange.Start.Line || pos.Line > keyRange.End.Line ||
+	if !keyRange.ContainsPos(pos) ||
 		(pos.Line == keyRange.Start.Line && pos.Column < keyRange.Start.Column) ||
 		(pos.Line == keyRange.End.Line && pos.Column > keyRange.End.Column) {
 		return nil, nil // Not on key, do not show hover
@@ -77,15 +77,6 @@ func (svc *service) HandleHover(ctx context.Context, params protocol.TextDocumen
 			Kind:  protocol.Markdown,
 			Value: content,
 		},
-		Range: protocol.Range{
-			Start: protocol.Position{
-				Line:      uint32(keyRange.Start.Line - 1),
-				Character: uint32(keyRange.Start.Column - 1),
-			},
-			End: protocol.Position{
-				Line:      uint32(keyRange.End.Line - 1),
-				Character: uint32(keyRange.End.Column - 1),
-			},
-		},
+		Range: lsp.HCLRangeToLSP(keyRange),
 	}, nil
 }

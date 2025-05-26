@@ -66,8 +66,7 @@ func (svc *service) HandleHover(ctx context.Context, params protocol.TextDocumen
 
 	pos := lsp.LSPPosToHCL(params.Position)
 	// Only show hover if position is within the key range
-	if !keyRange.ContainsPos(pos) ||
-		(pos.Line == keyRange.Start.Line && pos.Column < keyRange.Start.Column) ||
+	if (pos.Line == keyRange.Start.Line && pos.Column < keyRange.Start.Column) ||
 		(pos.Line == keyRange.End.Line && pos.Column > keyRange.End.Column) {
 		return nil, nil // Not on key, do not show hover
 	}

@@ -73,13 +73,8 @@ type SchemaAttribute struct {
 
 func (b *SchemaAttribute) GetAutoCompletePossibleValues() []string {
 	switch b.AttributeType {
-	case cty.String:
-		possibleValues := make([]string, 0, len(b.PossibleValues))
-		for _, value := range b.PossibleValues {
-			possibleValues = append(possibleValues, fmt.Sprintf(`"%s"`, value))
-		}
-
-		return possibleValues
+	case cty.Bool:
+		return []string{"true", "false"}
 	default:
 		return b.PossibleValues
 	}

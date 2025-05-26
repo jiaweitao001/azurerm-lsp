@@ -11,6 +11,7 @@ import (
 func GenerateProviderSchema(providerPath, gitBranch string) {
 	dirPath := os.Getenv("PWD") + "/provider-schema"
 
+	// #nosec G115
 	cmd := exec.Command(
 		"bash",
 		"-c",

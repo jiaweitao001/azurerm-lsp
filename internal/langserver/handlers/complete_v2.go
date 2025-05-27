@@ -3,6 +3,9 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"github.com/zclconf/go-cty/cty"
+	"strings"
+
 	"github.com/Azure/azurerm-lsp/internal/parser"
 	"github.com/Azure/azurerm-lsp/internal/protocol"
 	"github.com/Azure/azurerm-lsp/internal/utils"
@@ -16,31 +19,31 @@ func (svc *service) HandleComplete(ctx context.Context, params protocol.Completi
 		return nil, err
 	}
 
+	if shouldGiveTopLevelCompletions(docContent, int(params.Position.Line)) {
+		return GetTopLevelCompletions(params), nil
+	}
+
 	ctxInfo, diags, err := parser.BuildHCLContext(docContent, docFileName, params.Position)
 	if err != nil || (diags != nil && diags.HasErrors()) {
-		docContent, fieldName, isNewBlock, err := parser.AttemptReparse(docContent, params.Position.Line)
+		docContent, fieldName, _, err := parser.AttemptReparse(docContent, params.Position.Line)
 		if err != nil {
-			if isNewBlock {
-				return GetTopLevelCompletions(params), nil
-			}
-
 			return nil, nil
 		}
 
 		ctxInfo, diags, err = parser.BuildHCLContext(docContent, docFileName, params.Position)
 		if err != nil || (diags != nil && diags.HasErrors()) {
-			if utils.MatchAnyPrefix(fieldName, schema.AzureRMPrefix, schema.ResourcesPrefix) {
-				return GetTopLevelCompletions(params), nil
-			}
-
 			return nil, nil
 		}
 
 		if ctxInfo.Block != nil || ctxInfo.SubBlock != nil || ctxInfo.Attribute != nil {
-			return GetAttributeCompletions(ctxInfo.Resource, ctxInfo.ParsedPath+"."+fieldName), nil
+			if ctxInfo.ParsedPath != "" {
+				fieldName = ctxInfo.ParsedPath + "." + fieldName
+			}
+
+			return GetAttributeCompletions(ctxInfo.Resource, fieldName), nil
 		}
 
-		return GetTopLevelCompletions(params), nil
+		return nil, nil
 	}
 
 	switch {
@@ -49,7 +52,7 @@ func (svc *service) HandleComplete(ctx context.Context, params protocol.Completi
 	case ctxInfo.SubBlock != nil || ctxInfo.Block != nil:
 		return GetBlockAttributeCompletions(ctxInfo.Resource, ctxInfo.ParsedPath), nil
 	default:
-		return GetTopLevelCompletions(params), nil
+		return nil, nil
 	}
 }
 
@@ -76,7 +79,7 @@ func GetTopLevelCompletions(params protocol.CompletionParams) []protocol.Complet
 		}
 
 		items = append(items, protocol.CompletionItem{
-			Label:            fmt.Sprintf("☁️(%s) %s", kind, name),
+			Label:            name,
 			InsertText:       snippet,
 			InsertTextFormat: protocol.SnippetTextFormat,
 			Kind:             protocol.SnippetCompletion,
@@ -107,15 +110,38 @@ func GetBlockAttributeCompletions(resourceName, path string) []protocol.Completi
 			continue
 		}
 
+		insertText := p.Name
+		if p.AttributeType.IsPrimitiveType() {
+			switch p.AttributeType {
+			case cty.String:
+				insertText = fmt.Sprintf(`%s = "$0"`, p.Name)
+			case cty.Bool:
+				insertText = fmt.Sprintf(`%s = $0`, p.Name)
+			case cty.Number:
+				insertText = fmt.Sprintf(`%s = $0`, p.Name)
+			default:
+				insertText = fmt.Sprintf(`%s = $0`, p.Name)
+			}
+		} else if p.AttributeType.IsMapType() || p.AttributeType.IsObjectType() {
+			insertText = fmt.Sprintf(`%s {$0}`, p.Name)
+		} else if p.AttributeType.IsListType() || p.AttributeType.IsSetType() {
+			insertText = fmt.Sprintf(`%s = [$0]`, p.Name)
+		}
+
 		items = append(items, protocol.CompletionItem{
-			Label:      fmt.Sprintf("☁️(property) %s (%s)", p.Name, prop.GetRequirementType()),
-			Kind:       protocol.SnippetCompletion,
-			SortText:   p.GetSortOrder(),
-			Detail:     "Property Info",
-			InsertText: p.Name,
+			Label:            p.Name,
+			Kind:             protocol.PropertyCompletion,
+			SortText:         p.GetSortOrder(),
+			InsertText:       insertText,
+			InsertTextFormat: protocol.SnippetTextFormat,
 			Documentation: protocol.MarkupContent{
 				Kind:  protocol.Markdown,
 				Value: content,
+			},
+			// Add this command to trigger suggestions after insertion
+			Command: &protocol.Command{
+				Title:   "Trigger Suggest",
+				Command: "editor.action.triggerSuggest",
 			},
 		})
 	}
@@ -127,13 +153,21 @@ func GetAttributeCompletions(resourceName, path string) []protocol.CompletionIte
 	if err != nil {
 		return nil
 	}
+	content, _, err := provider_schema.GetAttributeContent(resourceName, path)
+	if err != nil {
+		return nil
+	}
 
 	items := make([]protocol.CompletionItem, 0, len(values))
 	for _, val := range values {
 		items = append(items, protocol.CompletionItem{
-			Label:      "☁️(value) " + val,
-			Kind:       protocol.SnippetCompletion,
-			InsertText: val,
+			Label:  val,
+			Kind:   protocol.ValueCompletion,
+			Detail: "Possible value for " + path,
+			Documentation: protocol.MarkupContent{
+				Kind:  protocol.Markdown,
+				Value: content,
+			},
 		})
 	}
 
@@ -144,4 +178,30 @@ func getLineRange(params protocol.CompletionParams) protocol.Range {
 	start := protocol.Position{Line: params.Position.Line, Character: 0}
 	end := params.Position
 	return protocol.Range{Start: start, End: end}
+}
+
+func shouldGiveTopLevelCompletions(content string, line int) bool {
+	lines := strings.Split(content, "\n")
+	if line >= len(lines) {
+		return false
+	}
+
+	currentLine := strings.TrimSpace(lines[line])
+	if !utils.MatchAnyPrefix(currentLine, schema.AzureRMPrefix) {
+		return false
+	}
+
+	// Check if we're at root level by counting unclosed blocks
+	openBlocks := 0
+	for i := 0; i <= line; i++ {
+		trimmed := strings.TrimSpace(lines[i])
+		if strings.Contains(trimmed, "{") {
+			openBlocks++
+		}
+		if strings.Contains(trimmed, "}") {
+			openBlocks--
+		}
+	}
+
+	return openBlocks == 0
 }

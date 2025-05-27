@@ -100,7 +100,7 @@ func buildNestedPath(topLevelBlock *hclsyntax.Block, targetNode hclsyntax.Node) 
 func AttemptReparse(content string, lineNum uint32) (updatedContent, fieldName string, isNewBlock bool, err error) {
 	lineContents := strings.Split(content, "\n")
 
-	if lineNum < 0 || int(lineNum) >= len(lineContents) {
+	if int(lineNum) >= len(lineContents) {
 		return "", "", false, fmt.Errorf("invalid line number")
 	}
 

@@ -10,13 +10,7 @@ import (
 
 var handlerMap = map[string]command.CommandHandler{}
 
-const CommandConvertJsonToazurerm = "azurerm.convertJsonToazurerm"
-const CommandAztfMigrate = "azurerm.aztfmigrate"
 const CommandTelemetry = "azurerm.telemetry"
-
-func availableCommands() []string {
-	return []string{CommandConvertJsonToazurerm, CommandAztfMigrate, CommandTelemetry}
-}
 
 func init() {
 	handlerMap = make(map[string]command.CommandHandler)

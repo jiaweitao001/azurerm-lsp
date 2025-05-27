@@ -13,36 +13,47 @@ import (
 
 func initializeResponse(t *testing.T, commandPrefix string) string {
 	return `{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "result": {
-        "capabilities": {
-            "textDocumentSync": {
-                "openClose": true,
-                "change": 2,
-                "save": {}
-            },
-            "completionProvider": {
-                "triggerCharacters": [
-                    "",
-                    " ",
-                    ".",
-                    "/",
-                    "@",
-                    "{",
-                    "\""
-                ],
-                "completionItem": {}
-            },
-            "hoverProvider": true,
-            "declarationProvider": false,
-            "codeActionProvider": false
-        },
-        "serverInfo": {
-            "name": "azurerm-lsp"
-        }
-    }
-}`
+		"jsonrpc": "2.0",
+		"id": 1,
+		"result": {
+		  "capabilities": {
+			"textDocumentSync": {
+			  "openClose": true,
+			  "change": 2,
+			  "save": {}
+			},
+			"completionProvider": {
+			  "triggerCharacters": [
+				"",
+				" ",
+				".",
+				"/",
+				"@",
+				"{",
+				"\""
+			  ],
+			  "completionItem": {}
+			},
+			"hoverProvider": true,
+			"declarationProvider": false,
+			"codeActionProvider": {
+			  "codeActionKinds": [
+				"refactor.rewrite"
+			  ]
+			},
+			"executeCommandProvider": {
+				"commands": [
+					"azurerm.telemetry",
+					"azurerm.aztfauthorize"
+				],
+				"workDoneProgress": true
+			}
+		  },
+		  "serverInfo": {
+			"name": "azurerm-lsp"
+		  }
+		}
+	}`
 }
 
 func TestInitalizeAndShutdown(t *testing.T) {

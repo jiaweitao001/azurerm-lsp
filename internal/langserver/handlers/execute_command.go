@@ -10,11 +10,19 @@ import (
 
 var handlerMap = map[string]command.CommandHandler{}
 
-const CommandTelemetry = "azurerm.telemetry"
+const (
+	CommandTelemetry     = "azurerm.telemetry"
+	CommandAztfAuthorize = "azurerm.aztfauthorize"
+)
+
+func availableCommands() []string {
+	return []string{CommandTelemetry, CommandAztfAuthorize}
+}
 
 func init() {
 	handlerMap = make(map[string]command.CommandHandler)
 	handlerMap[CommandTelemetry] = command.TelemetryCommand{}
+	handlerMap[CommandAztfAuthorize] = command.AztfAuthorizeCommand{}
 }
 
 func (svc *service) WorkspaceExecuteCommand(ctx context.Context, params lsp.ExecuteCommandParams) (interface{}, error) {

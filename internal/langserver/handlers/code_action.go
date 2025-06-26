@@ -65,14 +65,26 @@ func (h *logHandler) textDocumentCodeAction(ctx context.Context, params lsp.Code
 		return list, nil
 	}
 
+	hasAzapiForGeneratingPermission := false
+	hasAzurermForGeneratingPermission := false
 	hasAzapiResources := false
 	hasAzurermResources := false
 	for _, block := range body.Blocks {
 		if startPos.Position().Byte <= block.Range().Start.Byte && block.Range().End.Byte <= endPos.Position().Byte {
+			address := strings.Join(block.Labels, ".")
+
+			if strings.HasPrefix(address, "azurerm") {
+				hasAzurermForGeneratingPermission = true
+			}
+			if strings.HasPrefix(address, "azapi_resource") || strings.HasPrefix(address, "azapi_update_resource") {
+				// azapi_resource (resource/datasource), azapi_resource_action, azapi_update_resource
+				hasAzapiForGeneratingPermission = true
+			}
+
 			if block.Type != "resource" {
 				continue
 			}
-			address := strings.Join(block.Labels, ".")
+
 			if strings.HasPrefix(address, "azapi_resource.") {
 				hasAzapiResources = true
 			}
@@ -82,13 +94,13 @@ func (h *logHandler) textDocumentCodeAction(ctx context.Context, params lsp.Code
 		}
 	}
 
-	list = append(list, listCodeActionForGeneratingPermission(params, hasAzapiResources, hasAzurermResources)...)
+	list = append(list, listCodeActionForGeneratingPermission(params, hasAzapiForGeneratingPermission, hasAzurermForGeneratingPermission)...)
 	list = append(list, listCodeActionForMigratingResources(params, hasAzapiResources, hasAzurermResources)...)
 	return list, nil
 }
 
-func listCodeActionForGeneratingPermission(params lsp.CodeActionParams, hasAzapiResources bool, hasAzurermResources bool) []lsp.CodeAction {
-	if !hasAzurermResources {
+func listCodeActionForGeneratingPermission(params lsp.CodeActionParams, hasAzapi bool, hasAzurerm bool) []lsp.CodeAction {
+	if !hasAzapi && !hasAzurerm {
 		return nil
 	}
 	argument, _ := json.Marshal(params)
@@ -100,7 +112,7 @@ func listCodeActionForGeneratingPermission(params lsp.CodeActionParams, hasAzapi
 		"generateForMissingPermission": true,
 	})
 	return []lsp.CodeAction{
-		lsp.CodeAction{
+		{
 			Title:       "Generate Custom Role",
 			Kind:        "refactor.rewrite",
 			Diagnostics: nil,
@@ -121,7 +133,7 @@ func listCodeActionForGeneratingPermission(params lsp.CodeActionParams, hasAzapi
 			},
 			Data: nil,
 		},
-		lsp.CodeAction{
+		{
 			Title:       "Generate Custom Role for Missing Permissions",
 			Kind:        "refactor.rewrite",
 			Diagnostics: nil,

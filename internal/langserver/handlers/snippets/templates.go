@@ -3,6 +3,7 @@ package snippets
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	lsp "github.com/Azure/ms-terraform-lsp/internal/protocol"
@@ -99,15 +100,15 @@ func AzureRMTemplateCandidates(editRange lsp.Range) []lsp.CompletionItem {
 		return azurermTemplateCandidates
 	}
 
-	resources := provider_schema.ListAllResources()
 	azurermTemplateCandidates = make([]lsp.CompletionItem, 0)
-	for _, name := range resources {
-		snippet, err := provider_schema.GetSnippet(name)
+	for _, obj := range provider_schema.ListAllResourcesAndDataSources() {
+		name := obj.Name
+		snippet, err := provider_schema.GetSnippet(name, obj.IsDataSource())
 		if err != nil {
 			continue
 		}
 
-		content, isDataSource, err := provider_schema.GetResourceContent(name)
+		content, isDataSource, err := provider_schema.GetResourceContent(name, false)
 		if err != nil {
 			continue
 		}
@@ -115,6 +116,7 @@ func AzureRMTemplateCandidates(editRange lsp.Range) []lsp.CompletionItem {
 		kind := "resource"
 		if isDataSource {
 			kind = "data source"
+			name = fmt.Sprintf("%s (%s)", obj.GetName(), kind)
 		}
 
 		event := lsp.TelemetryEvent{

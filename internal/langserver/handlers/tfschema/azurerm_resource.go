@@ -21,7 +21,13 @@ func (a AzureRMResource) ResourceDocumentation(resourceType string) string {
 		return ""
 	}
 
-	content, _, err := provider_schema.GetResourceContent(parts[1])
+	blockType := parts[0]
+	isDataSource := false
+	if blockType == "data" {
+		isDataSource = true
+	}
+
+	content, _, err := provider_schema.GetResourceContent(parts[1], isDataSource)
 	if err != nil {
 		return ""
 	}
@@ -34,17 +40,24 @@ func (a AzureRMResource) ListProperties(blockPath string) []Property {
 		return nil
 	}
 
-	resourceName := parts[1]
+	blockType := parts[0]
+	objName := parts[1]
+
+	isDataSource := false
+	if blockType == "data" {
+		isDataSource = true
+	}
+
 	path := strings.Join(parts[2:], ".")
 
-	props, err := provider_schema.ListDirectProperties(resourceName, path)
+	props, err := provider_schema.ListDirectProperties(objName, path, isDataSource)
 	if err != nil {
 		return nil
 	}
 
 	var items []Property
 	for _, p := range props {
-		content, prop, err := provider_schema.GetAttributeContent(resourceName, p.AttributePath)
+		content, prop, err := provider_schema.GetAttributeContent(objName, p.AttributePath, isDataSource)
 		if err != nil || prop == nil {
 			continue
 		}
@@ -58,11 +71,17 @@ func (a AzureRMResource) GetProperty(propertyPath string) *Property {
 	if len(parts) < 2 {
 		return nil
 	}
-	resourceName := parts[1]
+	objName := parts[1]
+
+	isDataSource := false
+	if parts[0] == "data" {
+		isDataSource = true
+	}
+
 	path := strings.Join(parts[2:], ".")
 
-	values, _ := provider_schema.GetPossibleValuesForProperty(resourceName, path)
-	content, prop, _ := provider_schema.GetAttributeContent(resourceName, path)
+	values, _ := provider_schema.GetPossibleValuesForProperty(objName, path, isDataSource)
+	content, prop, _ := provider_schema.GetAttributeContent(objName, path, isDataSource)
 
 	fixedItems := make([]lsp.CompletionItem, 0)
 	for _, val := range values {
@@ -95,7 +114,7 @@ func (a AzureRMResource) Match(name string) bool {
 	if len(parts) != 2 {
 		return false
 	}
-	return strings.HasPrefix(parts[1], "azurerm_") && parts[0] == "resource"
+	return strings.HasPrefix(parts[1], "azurerm_") && (parts[0] == "resource" || parts[0] == "data")
 }
 
 func ToProperty(p *schema.SchemaAttribute, content string) Property {

@@ -27,7 +27,7 @@ func (a AzureRMResource) ResourceDocumentation(resourceType string) string {
 		isDataSource = true
 	}
 
-	content, _, err := provider_schema.GetResourceContent(parts[1], isDataSource)
+	content, err := provider_schema.GetResourceContent(parts[1], isDataSource)
 	if err != nil {
 		return ""
 	}

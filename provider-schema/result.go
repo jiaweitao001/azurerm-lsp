@@ -195,10 +195,10 @@ func GetPropertyDocContent(objName string, property *schema.SchemaAttribute, isD
 	return fmt.Sprintf("%s\n\n%s", propertyDescription, strings.Join(directPropertiesDescriptions, "\n"))
 }
 
-func GetResourceContent(objName string, isDataSource bool) (string, bool, error) {
+func GetResourceContent(objName string, isDataSource bool) (string, error) {
 	resourceInfo, err := GetObjectInfo(objName, isDataSource)
 	if err != nil {
-		return "", false, fmt.Errorf("error retrieving resource info: %v", err)
+		return "", fmt.Errorf("error retrieving resource info: %v", err)
 	}
 	return fmt.Sprintf(ResourceTemplate,
 		objName,
@@ -206,7 +206,7 @@ func GetResourceContent(objName string, isDataSource bool) (string, bool, error)
 		resourceInfo.GetGitHubIssueLink(),
 		resourceInfo.GetRaiseGitHubIssueLink(),
 		resourceInfo.GetDocContent(),
-	), resourceInfo.IsDataSource(), nil
+	), nil
 }
 
 func GetAttributeContent(objName, path string, isDataSource bool) (string, *schema.SchemaAttribute, error) {

@@ -108,13 +108,13 @@ func AzureRMTemplateCandidates(editRange lsp.Range) []lsp.CompletionItem {
 			continue
 		}
 
-		content, isDataSource, err := provider_schema.GetResourceContent(name, false)
+		content, err := provider_schema.GetResourceContent(name, obj.IsDataSource())
 		if err != nil {
 			continue
 		}
 
 		kind := "resource"
-		if isDataSource {
+		if obj.IsDataSource() {
 			kind = "data source"
 			name = fmt.Sprintf("%s (%s)", obj.GetName(), kind)
 		}

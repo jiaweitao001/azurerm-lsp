@@ -13,8 +13,6 @@ func GenerateProviderSchema(providerPath, gitBranch string) {
 
 	// #nosec G115
 	cmd := exec.Command(
-		"bash",
-		"-c",
 		filepath.Join(dirPath, "processors/.tools/generate-provider-schema/run.sh"),
 		providerPath,
 		gitBranch,

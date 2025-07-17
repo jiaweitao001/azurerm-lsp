@@ -247,6 +247,9 @@ func (m *Mark) buildField() {
 				}
 				return false
 			})
+
+			trimmed = strings.TrimPrefix(trimmed, "Data Source: ")
+
 			if !strings.Contains(trimmed, " ") {
 				m.ResourceType = trimmed
 			}

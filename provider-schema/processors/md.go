@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Azure/ms-terraform-lsp/provider-schema/azurerm/schema"
 	"github.com/Azure/ms-terraform-lsp/provider-schema/processors/.tools/document-lint/md"
 	"github.com/Azure/ms-terraform-lsp/provider-schema/processors/.tools/document-lint/model"
 )
@@ -19,7 +20,7 @@ func ProcessMarkdown(providerDir string) (map[string]*model.ResourceDoc, error) 
 
 	// Walk through the markdown directory
 	processDir := func(dir string, isDataSource bool) error {
-		err := filepath.Walk(providerDir, func(path string, info os.FileInfo, err error) error {
+		err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -29,7 +30,7 @@ func ProcessMarkdown(providerDir string) (map[string]*model.ResourceDoc, error) 
 				doc := mark.BuildResourceDoc()
 
 				if isDataSource {
-					doc.ResourceName = "datasource#" + doc.ResourceName
+					doc.ResourceName = schema.InputDataSourcePrefix + doc.ResourceName
 				}
 
 				allDocs[doc.ResourceName] = doc

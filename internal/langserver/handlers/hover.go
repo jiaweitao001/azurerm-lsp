@@ -80,7 +80,24 @@ func HoverAtPos(ctx context.Context, data []byte, filename string, pos hcl.Pos, 
 		return nil
 	}
 
-	resourceName := fmt.Sprintf("%s.%s", resourceBlock.Type, resourceBlock.Labels[0])
+	var resourceName string
+	if resourceBlock.Type == "module" {
+		if v := parser.BlockAttributeLiteralValue(resourceBlock, "source"); v != nil {
+			moduleNameArr := strings.Split(*v, "/")
+			if len(moduleNameArr) < 2 {
+				logger.Printf("module source '%s' is not valid", *v)
+				return nil
+			}
+			moduleName := moduleNameArr[1]
+			resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, moduleName)
+		}
+	} else {
+		resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, resourceBlock.Labels[0])
+	}
+
+	if resourceName == "" {
+		return nil
+	}
 	resource := tfschema.GetResourceSchema(resourceName)
 	if resource == nil {
 		return nil
@@ -138,7 +155,7 @@ func HoverAtPos(ctx context.Context, data []byte, filename string, pos hcl.Pos, 
 			doc = (*resource).ResourceDocumentation(resourceType)
 			docId = fmt.Sprintf("msgraph_resource.%s", resourceType)
 
-		case strings.Contains(resourceName, "azurerm_"):
+		default:
 			doc = (*resource).ResourceDocumentation(resourceName)
 			docId = resourceName
 		}

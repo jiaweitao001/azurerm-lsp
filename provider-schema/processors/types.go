@@ -35,6 +35,10 @@ func (b *TerraformObject) GetResourceOrDataSourceDocLink() string {
 	return fmt.Sprintf(schema.TerraformDocsURL, schema.DefaultDocVersion, schema.Resources, objectDocName)
 }
 
+func (b *TerraformObject) GetModuleDocLink() string {
+	return fmt.Sprintf("https://registry.terraform.io/modules/Azure/%s/azurerm/latest", b.GetName())
+}
+
 func (b *TerraformObject) GetGitHubIssueLink() string {
 	return fmt.Sprintf(schema.GitHubIssuesURL, b.GetName())
 }

@@ -11,6 +11,15 @@ import (
 
 var finalTerraformObject processors.TerraformObjects
 
+const ModuleTemplate = `## %s
+
+[📖 Documentation](<%s>) | [🔍 See Related Issues](<%s>) | [🐛 Raise Issue](<%s>)
+
+---
+
+%s
+`
+
 func GetFinalTerraformObject() processors.TerraformObjects {
 	if finalTerraformObject == nil {
 		terraformObject, err := processors.LoadProcessedOutput()
@@ -66,7 +75,7 @@ func ListAllResourcesAndDataSources() []string {
 func NavigateToNestedBlock(objectName, path string) (*schema.SchemaAttribute, error) {
 	resource, exists := GetFinalTerraformObject()[objectName]
 	if !exists {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
+		return nil, fmt.Errorf("module/resource/data source '%s' not found", objectName)
 	}
 
 	parts := strings.Split(path, ".")
@@ -79,13 +88,13 @@ func NavigateToNestedBlock(objectName, path string) (*schema.SchemaAttribute, er
 	for _, part := range parts {
 		result, exists = curFields[part]
 		if !exists {
-			return nil, fmt.Errorf("path '%s' not found in resource/data source '%s'", path, objectName)
+			return nil, fmt.Errorf("path '%s' not found in module/resource/data source '%s'", path, objectName)
 		}
 		curFields = result.Fields
 	}
 
 	if result == nil {
-		return nil, fmt.Errorf("path '%s' is nil in resource/data source '%s'", path, objectName)
+		return nil, fmt.Errorf("path '%s' is nil in module/resource/data source '%s'", path, objectName)
 	}
 
 	return result, nil
@@ -94,7 +103,7 @@ func NavigateToNestedBlock(objectName, path string) (*schema.SchemaAttribute, er
 func GetObjectInfo(objectName string) (*processors.TerraformObject, error) {
 	resource, exists := GetFinalTerraformObject()[objectName]
 	if !exists {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
+		return nil, fmt.Errorf("module/resource/data source '%s' not found", objectName)
 	}
 
 	return resource, nil
@@ -111,11 +120,11 @@ func GetPossibleValuesForProperty(objectName, propertyName string) ([]string, er
 	}
 
 	if block == nil {
-		return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", propertyName, objectName)
+		return nil, fmt.Errorf("block '%s' not found in module/resource/data source '%s'", propertyName, objectName)
 	}
 
 	if block.PossibleValues == nil {
-		return nil, fmt.Errorf("no possible values found for block '%s' in resource/data source '%s'", propertyName, objectName)
+		return nil, fmt.Errorf("no possible values found for block '%s' in module/resource/data source '%s'", propertyName, objectName)
 	}
 
 	return block.GetAutoCompletePossibleValues(), nil
@@ -124,7 +133,7 @@ func GetPossibleValuesForProperty(objectName, propertyName string) ([]string, er
 func ListDirectProperties(objectName string, path string) ([]*schema.SchemaAttribute, error) {
 	resource, exists := GetFinalTerraformObject()[objectName]
 	if !exists {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
+		return nil, fmt.Errorf("module/resource/data source '%s' not found", objectName)
 	}
 	fields := resource.Fields
 
@@ -135,7 +144,7 @@ func ListDirectProperties(objectName string, path string) ([]*schema.SchemaAttri
 		}
 
 		if block == nil {
-			return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", path, objectName)
+			return nil, fmt.Errorf("block '%s' not found in module/resource/data source '%s'", path, objectName)
 		}
 
 		fields = block.Fields
@@ -176,7 +185,7 @@ func setSort(properties []*schema.SchemaAttribute) {
 func GetSnippet(objectName string) (string, error) {
 	resource, exists := GetFinalTerraformObject()[objectName]
 	if !exists {
-		return "", fmt.Errorf("resource/data source '%s' not found", objectName)
+		return "", fmt.Errorf("module/resource/data source '%s' not found", objectName)
 	}
 
 	return resource.GetSnippet(), nil
@@ -216,6 +225,20 @@ func GetResourceContent(resourceName string) (string, bool, error) {
 		resourceInfo.GetRaiseGitHubIssueLink(),
 		resourceInfo.GetDocContent(),
 	), resourceInfo.IsDataSource(), nil
+}
+
+func GetModuleContent(moduleName string) (string, bool, error) {
+	moduleInfo, err := GetObjectInfo(moduleName)
+	if err != nil {
+		return "", false, fmt.Errorf("error retrieving module info: %v", err)
+	}
+	return fmt.Sprintf(ModuleTemplate,
+		moduleName,
+		moduleInfo.GetModuleDocLink(),
+		moduleInfo.GetGitHubIssueLink(),
+		moduleInfo.GetRaiseGitHubIssueLink(),
+		moduleInfo.GetDocContent(),
+	), false, nil
 }
 
 func GetAttributeContent(resourceName, path string) (string, *schema.SchemaAttribute, error) {

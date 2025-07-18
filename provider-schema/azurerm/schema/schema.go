@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -69,6 +70,44 @@ type SchemaAttribute struct {
 	NestingMode NestingMode                 `json:"nesting_mode,omitempty"`
 	Fields      map[string]*SchemaAttribute `json:"fields,omitempty"`
 	sortOrder   string
+}
+
+func (a *SchemaAttribute) UnmarshalJSON(b []byte) error {
+	type Alias SchemaAttribute
+	alias := &struct {
+		AttributeType json.RawMessage `json:"type,omitempty"`
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+	if err := json.Unmarshal(b, &alias); err != nil {
+		return err
+	}
+
+	if alias.AttributeType != nil {
+		var typeString string
+		if err := json.Unmarshal(alias.AttributeType, &typeString); err == nil {
+			if strings.HasPrefix(typeString, "map of") || strings.HasPrefix(typeString, "list of") || strings.HasPrefix(typeString, "set of") || typeString == "object" {
+				a.AttributeType = cty.DynamicPseudoType
+			} else {
+				// Try to unmarshal as a cty.Type
+				var ctyType cty.Type
+				if err := json.Unmarshal(alias.AttributeType, &ctyType); err != nil {
+					return fmt.Errorf("invalid primitive type name %q", typeString)
+				}
+				a.AttributeType = ctyType
+			}
+		} else {
+			// Try to unmarshal as a cty.Type
+			var ctyType cty.Type
+			if err := json.Unmarshal(alias.AttributeType, &ctyType); err != nil {
+				return err
+			}
+			a.AttributeType = ctyType
+		}
+	}
+
+	return nil
 }
 
 func (b *SchemaAttribute) GetAutoCompletePossibleValues() []string {

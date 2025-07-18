@@ -11,6 +11,15 @@ import (
 
 var finalTerraformObject processors.TerraformObjects
 
+const ModuleTemplate = `## %s
+
+[📖 Documentation](<%s>) | [🔍 See Related Issues](<%s>) | [🐛 Raise Issue](<%s>)
+
+---
+
+%s
+`
+
 func GetFinalTerraformObject(objName string, isDataSource bool) *processors.TerraformObject {
 	if finalTerraformObject == nil {
 		terraformObject, err := processors.LoadProcessedOutput()
@@ -56,7 +65,7 @@ func ListAllResourcesAndDataSources() []*processors.TerraformObject {
 func NavigateToNestedBlock(objName, path string, isDataSource bool) (*schema.SchemaAttribute, error) {
 	resource := GetFinalTerraformObject(objName, isDataSource)
 	if resource == nil {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objName)
+		return nil, fmt.Errorf("module/resource/data source '%s' not found", objName)
 	}
 
 	parts := strings.Split(path, ".")
@@ -70,13 +79,13 @@ func NavigateToNestedBlock(objName, path string, isDataSource bool) (*schema.Sch
 	for _, part := range parts {
 		result, exists = curFields[part]
 		if !exists {
-			return nil, fmt.Errorf("path '%s' not found in resource/data source '%s'", path, objName)
+			return nil, fmt.Errorf("path '%s' not found in module/resource/data source '%s'", path, objName)
 		}
 		curFields = result.Fields
 	}
 
 	if result == nil {
-		return nil, fmt.Errorf("path '%s' is nil in resource/data source '%s'", path, objName)
+		return nil, fmt.Errorf("path '%s' is nil in module/resource/data source '%s'", path, objName)
 	}
 
 	return result, nil
@@ -85,7 +94,7 @@ func NavigateToNestedBlock(objName, path string, isDataSource bool) (*schema.Sch
 func GetObjectInfo(objName string, isDataSource bool) (*processors.TerraformObject, error) {
 	resource := GetFinalTerraformObject(objName, isDataSource)
 	if resource == nil {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objName)
+		return nil, fmt.Errorf("module/resource/data source '%s' not found", objName)
 	}
 
 	return resource, nil
@@ -102,11 +111,11 @@ func GetPossibleValuesForProperty(objName, propertyName string, isDataSource boo
 	}
 
 	if block == nil {
-		return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", propertyName, objName)
+		return nil, fmt.Errorf("block '%s' not found in module/resource/data source '%s'", propertyName, objName)
 	}
 
 	if block.PossibleValues == nil {
-		return nil, fmt.Errorf("no possible values found for block '%s' in resource/data source '%s'", propertyName, objName)
+		return nil, fmt.Errorf("no possible values found for block '%s' in module/resource/data source '%s'", propertyName, objName)
 	}
 
 	return block.GetAutoCompletePossibleValues(), nil
@@ -115,7 +124,7 @@ func GetPossibleValuesForProperty(objName, propertyName string, isDataSource boo
 func ListDirectProperties(objName string, path string, isDataSource bool) ([]*schema.SchemaAttribute, error) {
 	resource := GetFinalTerraformObject(objName, isDataSource)
 	if resource == nil {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objName)
+		return nil, fmt.Errorf("module/resource/data source '%s' not found", objName)
 	}
 	fields := resource.Fields
 
@@ -167,7 +176,7 @@ func setSort(properties []*schema.SchemaAttribute) {
 func GetSnippet(objName string, isDataSource bool) (string, error) {
 	resource := GetFinalTerraformObject(objName, isDataSource)
 	if resource == nil {
-		return "", fmt.Errorf("resource/data source '%s' not found", objName)
+		return "", fmt.Errorf("module/resource/data source '%s' not found", objName)
 	}
 
 	return resource.GetSnippet(), nil
@@ -228,4 +237,18 @@ func GetAttributeContent(objName, path string, isDataSource bool) (string, *sche
 		strings.Join(prop.GetDetails(), "\n"),
 		GetPropertyDocContent(objName, prop, isDataSource),
 	), prop, nil
+}
+
+func GetModuleContent(moduleName string) (string, bool, error) {
+	moduleInfo, err := GetObjectInfo(moduleName, false)
+	if err != nil {
+		return "", false, fmt.Errorf("error retrieving module info: %v", err)
+	}
+	return fmt.Sprintf(ModuleTemplate,
+		moduleName,
+		moduleInfo.GetModuleDocLink(),
+		moduleInfo.GetGitHubIssueLink(),
+		moduleInfo.GetRaiseGitHubIssueLink(),
+		moduleInfo.GetDocContent(),
+	), false, nil
 }

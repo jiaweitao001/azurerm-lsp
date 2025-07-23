@@ -167,12 +167,24 @@ func (b *SchemaAttribute) GetAttributeDocLink(parentLink string) string {
 	return fmt.Sprintf("%s#%s", parentLink, outerField)
 }
 
+func (b *SchemaAttribute) GetModuleAttributeDocLink() string {
+	return fmt.Sprintf(AVMAttributeDocURL, b.ResourceOrDataSourceName, strings.Split(b.AttributePath, ".")[0])
+}
+
 func (b *SchemaAttribute) GetGitHubIssueLink() string {
 	return fmt.Sprintf(GitHubIssuesURL, b.ResourceOrDataSourceName+" "+strings.ReplaceAll(b.AttributePath, ".", " "))
 }
 
+func (b *SchemaAttribute) GetModuleGitHubIssueLink() string {
+	return fmt.Sprintf(AVMGitHubIssuesURL, b.ResourceOrDataSourceName, strings.Split(b.AttributePath, ".")[len(strings.Split(b.AttributePath, "."))-1])
+}
+
 func (b *SchemaAttribute) GetRaiseGitHubIssueLink() string {
 	return fmt.Sprintf(NewGitHubIssuesURL, fmt.Sprintf("`%s` - %s", b.ResourceOrDataSourceName, strings.ReplaceAll(b.AttributePath, ".", " ")))
+}
+
+func (b *SchemaAttribute) GetModuleRaiseGitHubIssueLink() string {
+	return fmt.Sprintf(AVMNewGitHubIssuesURL, b.ResourceOrDataSourceName)
 }
 
 func (b *SchemaAttribute) GetDetails() []string {

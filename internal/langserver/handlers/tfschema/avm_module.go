@@ -23,7 +23,7 @@ func (m AVMModule) GetProperty(propertyName string) *Property {
 	path := strings.Join(parts[2:], ".")
 
 	values, _ := provider_schema.GetPossibleValuesForProperty(moduleName, path)
-	content, prop, _ := provider_schema.GetAttributeContent(moduleName, path)
+	content, prop, _ := provider_schema.GetModuleAttributeContent(moduleName, path)
 
 	fixedItems := make([]lsp.CompletionItem, 0)
 	for _, val := range values {
@@ -76,7 +76,7 @@ func (m AVMModule) ListProperties(blockPath string) []Property {
 
 	var items []Property
 	for _, p := range props {
-		content, prop, err := provider_schema.GetAttributeContent(moduleName, p.AttributePath)
+		content, prop, err := provider_schema.GetModuleAttributeContent(moduleName, p.AttributePath)
 		if err != nil || prop == nil {
 			continue
 		}

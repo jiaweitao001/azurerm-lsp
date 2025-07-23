@@ -252,3 +252,20 @@ func GetModuleContent(moduleName string) (string, bool, error) {
 		moduleInfo.GetDocContent(),
 	), false, nil
 }
+
+func GetModuleAttributeContent(resourceName, path string) (string, *schema.SchemaAttribute, error) {
+	prop, err := GetPropertyInfo(resourceName, path, false)
+	if err != nil {
+		return "", nil, fmt.Errorf("error retrieving property info: %v", err)
+	}
+	return fmt.Sprintf(AttributeTemplate,
+		prop.Name,
+		prop.GetRequirementType(),
+		prop.AttributeType.FriendlyName(),
+		prop.GetModuleAttributeDocLink(),
+		prop.GetModuleGitHubIssueLink(),
+		prop.GetModuleRaiseGitHubIssueLink(),
+		strings.Join(prop.GetDetails(), "\n"),
+		GetPropertyDocContent(resourceName, prop, false),
+	), prop, nil
+}

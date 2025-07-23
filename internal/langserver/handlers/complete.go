@@ -97,6 +97,9 @@ func CandidatesAtPos(data []byte, filename string, pos hcl.Pos, logger *log.Logg
 		if shouldGiveTopLevelCompletions(string(data), pos.Line-1) {
 			candidateList = append(candidateList, snippets.AzureRMTemplateCandidates(editRange)...)
 		}
+
+		// avm templates
+		candidateList = append(candidateList, snippets.AVMTemplateCandidates(editRange)...)
 		return candidateList
 	}
 
@@ -105,7 +108,26 @@ func CandidatesAtPos(data []byte, filename string, pos hcl.Pos, logger *log.Logg
 		return candidateList
 	}
 
-	resourceName := fmt.Sprintf("%s.%s", resourceBlock.Type, resourceBlock.Labels[0])
+	var resourceName string
+	if resourceBlock.Type == "module" {
+		if v := parser.BlockAttributeLiteralValue(resourceBlock, "source"); v != nil {
+			moduleNameArr := strings.Split(*v, "/")
+			if len(moduleNameArr) < 2 {
+				logger.Printf("module source '%s' is not valid", *v)
+				return nil
+			}
+			moduleName := moduleNameArr[1]
+			resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, moduleName)
+		}
+	} else {
+		resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, resourceBlock.Labels[0])
+	}
+
+	if resourceName == "" {
+		logger.Printf("resource name is empty, cannot provide candidates")
+		return candidateList
+	}
+
 	resource := tfschema.GetResourceSchema(resourceName)
 	if resource == nil {
 		return candidateList

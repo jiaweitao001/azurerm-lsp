@@ -6,6 +6,7 @@ const (
 	Resources         = "resources"
 	DataSources       = "data-sources"
 	AzureRMPrefix     = "azurerm_"
+	AVMPrefix         = "avm-"
 	ResourcesPrefix   = "resource"
 	DataSourcesPrefix = "data"
 )

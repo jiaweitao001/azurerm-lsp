@@ -1,0 +1,339 @@
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "isIncomplete": false,
+    "items": [
+      {
+        "label": "customer_managed_key",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "customer_managed_key (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## customer_managed_key\n**[required] dynamic**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#customer_managed_key\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  customer_managed_key\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - customer_managed_key \u003e)\n\n---\n\n\n\nThe full Azure Resource ID of the key_vault where the customer managed key will be referenced from.\n      key_name                           = (Required) - The key name for the customer managed key in the key vault.\n      key_version                        = (Optional) - The version of the key to use\n      user_assigned_identity_resource_id = (Optional) - The user assigned identity to use when access the key vault\n    })\n\n    Example Inputs:\n    ```terraform\n    customer_managed_key = {\n      key_vault_resource_id = \"/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/test-resource-group/providers/Microsoft.KeyVault/vaults/example-key-vault\"\n      key_name              = \"sample-customer-key\"\n    }\n    ```\n\n - key_name: UnDocumented\n - key_vault_resource_id: UnDocumented\n - key_version: UnDocumented\n - user_assigned_identity: UnDocumented\n"
+        },
+        "sortText": "0000",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "customer_managed_key"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "enable_telemetry",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "enable_telemetry (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## enable_telemetry\n**[required] bool**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#enable_telemetry\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  enable_telemetry\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - enable_telemetry \u003e)\n\n---\n\n- **Default:** `true`\n\nThis variable controls whether or not telemetry is enabled for the module.\nFor more information see https://aka.ms/avm/telemetryinfo.\nIf it is set to false, then no telemetry will be collected.\n\n"
+        },
+        "sortText": "0001",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "enable_telemetry = $0"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "location",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "location (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## location\n**[required] string**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#location\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  location\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - location \u003e)\n\n---\n\n\n\nAzure region where the resource should be deployed.\nIf null, the location will be inferred from the resource group location.\n\n"
+        },
+        "sortText": "0002",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "location = \"$0\""
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "lock",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "lock (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## lock\n**[required] dynamic**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#lock\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  lock\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - lock \u003e)\n\n---\n\n\n\nThe lock level to apply. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.\n\n - kind: UnDocumented\n - name: UnDocumented\n"
+        },
+        "sortText": "0003",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "lock"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "managed_identities",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "managed_identities (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## managed_identities\n**[required] dynamic**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#managed_identities\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  managed_identities\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - managed_identities \u003e)\n\n---\n\n\n\n`system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.\n  - `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.\n\n - system_assigned: UnDocumented\n - user_assigned_resource_ids: UnDocumented\n"
+        },
+        "sortText": "0004",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "managed_identities"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "name",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "name (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## name\n**[required] string**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#name\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  name\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - name \u003e)\n\n---\n\n\n\nThe name of the resource.\n"
+        },
+        "sortText": "0005",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "name = \"$0\""
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "private_endpoints",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "private_endpoints (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## private_endpoints\n**[required] dynamic**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#private_endpoints\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  private_endpoints\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - private_endpoints \u003e)\n\n---\n\n\n\n`name` - (Optional) The name of the private endpoint. One will be generated if not set.\n- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.\n- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.\n- `tags` - (Optional) A mapping of tags to assign to the private endpoint.\n- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.\n- `subresource_name` - The service name of the private endpoint.  Possible value are `blob`, 'dfs', 'file', `queue`, `table`, and `web`.\n- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.\n- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.\n- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.\n- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.\n- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.\n- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.\n- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of the resource.\n- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.\n  - `name` - The name of the IP configuration.\n  - `private_ip_address` - The private IP address of the IP configuration.\n\n - subnet_resource_id: UnDocumented\n - subresource_name: UnDocumented\n - application_security_group_associations: UnDocumented\n - ip_configurations: UnDocumented\n - location: UnDocumented\n - lock: UnDocumented\n - name: UnDocumented\n - network_interface_name: UnDocumented\n - private_dns_zone_group_name: UnDocumented\n - private_dns_zone_resource_ids: UnDocumented\n - private_service_connection_name: UnDocumented\n - resource_group_name: UnDocumented\n - role_assignments: UnDocumented\n - tags: UnDocumented\n"
+        },
+        "sortText": "0006",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "private_endpoints"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "private_endpoints_manage_dns_zone_group",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "private_endpoints_manage_dns_zone_group (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## private_endpoints_manage_dns_zone_group\n**[required] bool**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#private_endpoints_manage_dns_zone_group\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  private_endpoints_manage_dns_zone_group\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - private_endpoints_manage_dns_zone_group \u003e)\n\n---\n\n- **Default:** `true`\n\nWhether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy.\n"
+        },
+        "sortText": "0007",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "private_endpoints_manage_dns_zone_group = $0"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "resource_group_name",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "resource_group_name (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## resource_group_name\n**[required] string**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#resource_group_name\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  resource_group_name\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - resource_group_name \u003e)\n\n---\n\n\n\nThe resource group where the resources will be deployed.\n"
+        },
+        "sortText": "0008",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "resource_group_name = \"$0\""
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "role_assignments",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "role_assignments (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## role_assignments\n**[required] dynamic**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#role_assignments\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  role_assignments\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - role_assignments \u003e)\n\n---\n\n\n\n`role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.\n- `principal_id` - The ID of the principal to assign the role to.\n- `description` - The description of the role assignment.\n- `skip_service_principal_aad_check` - If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.\n- `condition` - The condition which will be used to scope the role assignment.\n- `condition_version` - The version of the condition syntax. Valid values are '2.0'.\n\n\u003e Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.\n\n - principal_id: UnDocumented\n - role_definition_id_or_name: UnDocumented\n - condition: UnDocumented\n - condition_version: UnDocumented\n - delegated_managed_identity_resource_id: UnDocumented\n - description: UnDocumented\n - principal_type: UnDocumented\n - skip_service_principal_aad_check: UnDocumented\n"
+        },
+        "sortText": "0009",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "role_assignments"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      },
+      {
+        "label": "tags",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "tags (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## tags\n**[required] dynamic**\n\n[📖 Documentation](\u003chttps://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/avm-res-storage-storageaccount#tags\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue  tags\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`` - tags \u003e)\n\n---\n\n\n\nCustom tags to apply to the resource.\n"
+        },
+        "sortText": "0010",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {
+              "line": 2,
+              "character": 2
+            },
+            "end": {
+              "line": 2,
+              "character": 2
+            }
+          },
+          "newText": "tags"
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      }
+    ]
+  }
+}

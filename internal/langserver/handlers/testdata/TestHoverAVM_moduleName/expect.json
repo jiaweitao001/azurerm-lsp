@@ -1,0 +1,20 @@
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "contents": {
+      "kind": "markdown",
+      "value": "## avm-res-servicebus-namespace\n\n[📖 Documentation](\u003chttps://registry.terraform.io/modules/Azure/avm-res-servicebus-namespace/azurerm/latest\u003e) | [🔍 See Related Issues](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue avm-res-servicebus-namespace\u003e) | [🐛 Raise Issue](\u003chttps://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml\u0026title=`avm-res-servicebus-namespace` \u003e)\n\n---\n\n\n"
+    },
+    "range": {
+      "start": {
+        "line": 0,
+        "character": 0
+      },
+      "end": {
+        "line": 0,
+        "character": 12
+      }
+    }
+  }
+}

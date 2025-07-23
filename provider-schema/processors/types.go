@@ -27,6 +27,10 @@ func (b *TerraformObject) IsDataSource() bool {
 	return strings.HasPrefix(b.Name, schema.InputDataSourcePrefix)
 }
 
+func (b *TerraformObject) IsModule() bool {
+	return strings.HasPrefix(b.Name, schema.AVMPrefix)
+}
+
 func (b *TerraformObject) GetResourceOrDataSourceDocLink() string {
 	objectDocName, _ := strings.CutPrefix(b.GetName(), schema.AzureRMPrefix)
 	if b.IsDataSource() {

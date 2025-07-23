@@ -71,7 +71,6 @@ func (m AVMModule) ListProperties(blockPath string) []Property {
 
 	props, err := provider_schema.ListDirectProperties(moduleName, path)
 	if err != nil {
-		fmt.Printf("Error listing properties for module %s: %v\n", moduleName, err)
 		return nil
 	}
 
@@ -92,7 +91,7 @@ func (m AVMModule) ResourceDocumentation(resourceType string) string {
 		return ""
 	}
 
-	content, _, err := provider_schema.GetModuleContent(parts[1])
+	content, err := provider_schema.GetModuleContent(parts[1])
 	if err != nil {
 		return ""
 	}

@@ -11,7 +11,25 @@ import (
 
 var finalTerraformObject processors.TerraformObjects
 
-func GetFinalTerraformObject() processors.TerraformObjects {
+func GetFinalTerraformObject(objName string, isDataSource bool) *processors.TerraformObject {
+	if finalTerraformObject == nil {
+		terraformObject, err := processors.LoadProcessedOutput()
+		if err != nil {
+			panic(err)
+		}
+
+		finalTerraformObject = terraformObject
+	}
+
+	if isDataSource {
+		objName = schema.InputDataSourcePrefix + objName
+	}
+
+	obj, _ := finalTerraformObject[objName]
+	return obj
+}
+
+func GetFinalTerraformObjects() processors.TerraformObjects {
 	if finalTerraformObject == nil {
 		terraformObject, err := processors.LoadProcessedOutput()
 		if err != nil {
@@ -24,49 +42,21 @@ func GetFinalTerraformObject() processors.TerraformObjects {
 	return finalTerraformObject
 }
 
-func ListAllResources() []string {
-	var resources []string
+func ListAllResourcesAndDataSources() []*processors.TerraformObject {
+	resources := make([]*processors.TerraformObject, 0)
 
-	for name, terraformObject := range GetFinalTerraformObject() {
-		if terraformObject.IsDataSource() {
-			continue
-		}
-
-		resources = append(resources, name)
+	for _, terraformObject := range GetFinalTerraformObjects() {
+		resources = append(resources, terraformObject)
 	}
 
 	return resources
 }
 
-func ListAllDataSources() []string {
-	var dataSources []string
-
-	for _, terraformObject := range GetFinalTerraformObject() {
-		if !terraformObject.IsDataSource() {
-			continue
-		}
-
-		dataSources = append(dataSources, terraformObject.GetName())
-	}
-
-	return dataSources
-}
-
-func ListAllResourcesAndDataSources() []string {
-	var resourcesAndDataSources []string
-
-	for name := range GetFinalTerraformObject() {
-		resourcesAndDataSources = append(resourcesAndDataSources, name)
-	}
-
-	return resourcesAndDataSources
-}
-
 // NavigateToNestedBlock navigates down a nested block path and returns the final block or property
-func NavigateToNestedBlock(objectName, path string) (*schema.SchemaAttribute, error) {
-	resource, exists := GetFinalTerraformObject()[objectName]
-	if !exists {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
+func NavigateToNestedBlock(objName, path string, isDataSource bool) (*schema.SchemaAttribute, error) {
+	resource := GetFinalTerraformObject(objName, isDataSource)
+	if resource == nil {
+		return nil, fmt.Errorf("resource/data source '%s' not found", objName)
 	}
 
 	parts := strings.Split(path, ".")
@@ -76,66 +66,67 @@ func NavigateToNestedBlock(objectName, path string) (*schema.SchemaAttribute, er
 
 	curFields := resource.Fields
 	var result *schema.SchemaAttribute
+	var exists bool
 	for _, part := range parts {
 		result, exists = curFields[part]
 		if !exists {
-			return nil, fmt.Errorf("path '%s' not found in resource/data source '%s'", path, objectName)
+			return nil, fmt.Errorf("path '%s' not found in resource/data source '%s'", path, objName)
 		}
 		curFields = result.Fields
 	}
 
 	if result == nil {
-		return nil, fmt.Errorf("path '%s' is nil in resource/data source '%s'", path, objectName)
+		return nil, fmt.Errorf("path '%s' is nil in resource/data source '%s'", path, objName)
 	}
 
 	return result, nil
 }
 
-func GetObjectInfo(objectName string) (*processors.TerraformObject, error) {
-	resource, exists := GetFinalTerraformObject()[objectName]
-	if !exists {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
+func GetObjectInfo(objName string, isDataSource bool) (*processors.TerraformObject, error) {
+	resource := GetFinalTerraformObject(objName, isDataSource)
+	if resource == nil {
+		return nil, fmt.Errorf("resource/data source '%s' not found", objName)
 	}
 
 	return resource, nil
 }
 
-func GetPropertyInfo(objectName, propertyPath string) (*schema.SchemaAttribute, error) {
-	return NavigateToNestedBlock(objectName, propertyPath)
+func GetPropertyInfo(objName, propertyPath string, isDataSource bool) (*schema.SchemaAttribute, error) {
+	return NavigateToNestedBlock(objName, propertyPath, isDataSource)
 }
 
-func GetPossibleValuesForProperty(objectName, propertyName string) ([]string, error) {
-	block, err := NavigateToNestedBlock(objectName, propertyName)
+func GetPossibleValuesForProperty(objName, propertyName string, isDataSource bool) ([]string, error) {
+	block, err := NavigateToNestedBlock(objName, propertyName, isDataSource)
 	if err != nil {
 		return nil, err
 	}
 
 	if block == nil {
-		return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", propertyName, objectName)
+		return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", propertyName, objName)
 	}
 
 	if block.PossibleValues == nil {
-		return nil, fmt.Errorf("no possible values found for block '%s' in resource/data source '%s'", propertyName, objectName)
+		return nil, fmt.Errorf("no possible values found for block '%s' in resource/data source '%s'", propertyName, objName)
 	}
 
 	return block.GetAutoCompletePossibleValues(), nil
 }
 
-func ListDirectProperties(objectName string, path string) ([]*schema.SchemaAttribute, error) {
-	resource, exists := GetFinalTerraformObject()[objectName]
-	if !exists {
-		return nil, fmt.Errorf("resource/data source '%s' not found", objectName)
+func ListDirectProperties(objName string, path string, isDataSource bool) ([]*schema.SchemaAttribute, error) {
+	resource := GetFinalTerraformObject(objName, isDataSource)
+	if resource == nil {
+		return nil, fmt.Errorf("resource/data source '%s' not found", objName)
 	}
 	fields := resource.Fields
 
 	if path != "" {
-		block, err := NavigateToNestedBlock(objectName, path)
+		block, err := NavigateToNestedBlock(objName, path, isDataSource)
 		if err != nil {
 			return nil, err
 		}
 
 		if block == nil {
-			return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", path, objectName)
+			return nil, fmt.Errorf("block '%s' not found in resource/data source '%s'", path, objName)
 		}
 
 		fields = block.Fields
@@ -173,16 +164,16 @@ func setSort(properties []*schema.SchemaAttribute) {
 	}
 }
 
-func GetSnippet(objectName string) (string, error) {
-	resource, exists := GetFinalTerraformObject()[objectName]
-	if !exists {
-		return "", fmt.Errorf("resource/data source '%s' not found", objectName)
+func GetSnippet(objName string, isDataSource bool) (string, error) {
+	resource := GetFinalTerraformObject(objName, isDataSource)
+	if resource == nil {
+		return "", fmt.Errorf("resource/data source '%s' not found", objName)
 	}
 
 	return resource.GetSnippet(), nil
 }
 
-func GetPropertyDocContent(objectName string, property *schema.SchemaAttribute) string {
+func GetPropertyDocContent(objName string, property *schema.SchemaAttribute, isDataSource bool) string {
 	if property == nil {
 		return ""
 	}
@@ -190,7 +181,7 @@ func GetPropertyDocContent(objectName string, property *schema.SchemaAttribute) 
 	propertyDescription := property.GetDescription()
 
 	// try to get direct properties of this property
-	directProperties, err := ListDirectProperties(objectName, property.AttributePath)
+	directProperties, err := ListDirectProperties(objName, property.AttributePath, isDataSource)
 	if err != nil || len(directProperties) == 0 {
 		return propertyDescription
 	}
@@ -204,26 +195,26 @@ func GetPropertyDocContent(objectName string, property *schema.SchemaAttribute) 
 	return fmt.Sprintf("%s\n\n%s", propertyDescription, strings.Join(directPropertiesDescriptions, "\n"))
 }
 
-func GetResourceContent(resourceName string) (string, bool, error) {
-	resourceInfo, err := GetObjectInfo(resourceName)
+func GetResourceContent(objName string, isDataSource bool) (string, error) {
+	resourceInfo, err := GetObjectInfo(objName, isDataSource)
 	if err != nil {
-		return "", false, fmt.Errorf("error retrieving resource info: %v", err)
+		return "", fmt.Errorf("error retrieving resource info: %v", err)
 	}
 	return fmt.Sprintf(ResourceTemplate,
-		resourceName,
+		objName,
 		resourceInfo.GetResourceOrDataSourceDocLink(),
 		resourceInfo.GetGitHubIssueLink(),
 		resourceInfo.GetRaiseGitHubIssueLink(),
 		resourceInfo.GetDocContent(),
-	), resourceInfo.IsDataSource(), nil
+	), nil
 }
 
-func GetAttributeContent(resourceName, path string) (string, *schema.SchemaAttribute, error) {
-	obj, err := GetObjectInfo(resourceName)
+func GetAttributeContent(objName, path string, isDataSource bool) (string, *schema.SchemaAttribute, error) {
+	obj, err := GetObjectInfo(objName, isDataSource)
 	if err != nil {
 		return "", nil, fmt.Errorf("error retrieving object info: %v", err)
 	}
-	prop, err := GetPropertyInfo(resourceName, path)
+	prop, err := GetPropertyInfo(objName, path, isDataSource)
 	if err != nil {
 		return "", nil, fmt.Errorf("error retrieving property info: %v", err)
 	}
@@ -235,6 +226,6 @@ func GetAttributeContent(resourceName, path string) (string, *schema.SchemaAttri
 		prop.GetGitHubIssueLink(),
 		prop.GetRaiseGitHubIssueLink(),
 		strings.Join(prop.GetDetails(), "\n"),
-		GetPropertyDocContent(resourceName, prop),
+		GetPropertyDocContent(objName, prop, isDataSource),
 	), prop, nil
 }

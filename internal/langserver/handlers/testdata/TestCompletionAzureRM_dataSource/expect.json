@@ -1,0 +1,33 @@
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "isIncomplete": false,
+    "items": [
+      {
+        "label": "name",
+        "labelDetails": {},
+        "kind": 10,
+        "detail": "name (Required)",
+        "documentation": {
+          "kind": "markdown",
+          "value": "## name\n**[required] string**\n\n[📖 Documentation](<https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group#name>) | [🔍 See Related Issues](<https://github.com/hashicorp/terraform-provider-azurerm/issues?q=is:issue datasource#azurerm_resource_group name>) | [🐛 Raise Issue](<https://github.com/hashicorp/terraform-provider-azurerm/issues/new?template=Bug_Report.yml&title=`datasource#azurerm_resource_group` - name >)\n\n---\n\n\n\nThe Name of this Resource Group.\n"
+        },
+        "sortText": "0000",
+        "insertTextFormat": 2,
+        "insertTextMode": 2,
+        "textEdit": {
+          "range": {
+            "start": {"line": 0, "character": 2},
+            "end": {"line": 0, "character": 8}
+          },
+          "newText": "name = \"$0\""
+        },
+        "command": {
+          "title": "Suggest",
+          "command": "editor.action.triggerSuggest"
+        }
+      }
+    ]
+  }
+} 

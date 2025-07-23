@@ -166,5 +166,5 @@ func shouldGiveTopLevelCompletions(content string, line int) bool {
 	}
 
 	currentLine := strings.TrimSpace(lines[line])
-	return utils.MatchAnyPrefix(currentLine, schema.AzureRMPrefix)
+	return utils.MatchAnyPrefix(currentLine, schema.AzureRMPrefix) || currentLine == schema.ResourcesPrefix || currentLine == schema.DataSourcesPrefix
 }

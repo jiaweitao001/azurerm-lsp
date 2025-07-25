@@ -51,6 +51,20 @@ func GetFinalTerraformObjects() processors.TerraformObjects {
 	return finalTerraformObject
 }
 
+func ListAllModules() []string {
+	var modules []string
+
+	for name, terraformObject := range GetFinalTerraformObjects() {
+		if !terraformObject.IsModule() {
+			continue
+		}
+
+		modules = append(modules, name)
+	}
+
+	return modules
+}
+
 func ListAllResourcesAndDataSources() []*processors.TerraformObject {
 	resources := make([]*processors.TerraformObject, 0)
 
@@ -239,10 +253,10 @@ func GetAttributeContent(objName, path string, isDataSource bool) (string, *sche
 	), prop, nil
 }
 
-func GetModuleContent(moduleName string) (string, bool, error) {
+func GetModuleContent(moduleName string) (string, error) {
 	moduleInfo, err := GetObjectInfo(moduleName, false)
 	if err != nil {
-		return "", false, fmt.Errorf("error retrieving module info: %v", err)
+		return "", fmt.Errorf("error retrieving module info: %v", err)
 	}
 	return fmt.Sprintf(ModuleTemplate,
 		moduleName,
@@ -250,7 +264,7 @@ func GetModuleContent(moduleName string) (string, bool, error) {
 		moduleInfo.GetGitHubIssueLink(),
 		moduleInfo.GetRaiseGitHubIssueLink(),
 		moduleInfo.GetDocContent(),
-	), false, nil
+	), nil
 }
 
 func GetModuleAttributeContent(resourceName, path string) (string, *schema.SchemaAttribute, error) {

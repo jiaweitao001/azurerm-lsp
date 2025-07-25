@@ -218,7 +218,7 @@ func AVMTemplateCandidates(editRange lsp.Range) []lsp.CompletionItem {
 	modules := provider_schema.ListAllModules()
 	avmTemplateCandidates = make([]lsp.CompletionItem, 0)
 	for _, name := range modules {
-		snippet, err := provider_schema.GetSnippet(name)
+		snippet, err := provider_schema.GetSnippet(name, false)
 		if err != nil {
 			continue
 		}

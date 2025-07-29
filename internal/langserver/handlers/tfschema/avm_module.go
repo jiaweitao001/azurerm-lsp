@@ -22,8 +22,14 @@ func (m AVMModule) GetProperty(propertyName string) *Property {
 	moduleName := parts[1]
 	path := strings.Join(parts[2:], ".")
 
-	values, _ := provider_schema.GetPossibleValuesForProperty(moduleName, path, false)
-	content, prop, _ := provider_schema.GetModuleAttributeContent(moduleName, path)
+	values, err := provider_schema.GetPossibleValuesForProperty(moduleName, path, false)
+	if err != nil {
+		return nil
+	}
+	content, prop, err := provider_schema.GetModuleAttributeContent(moduleName, path)
+	if err != nil || prop == nil {
+		return nil
+	}
 
 	fixedItems := make([]lsp.CompletionItem, 0)
 	for _, val := range values {

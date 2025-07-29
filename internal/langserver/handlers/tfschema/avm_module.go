@@ -12,7 +12,7 @@ var _ Resource = &AVMModule{}
 type AVMModule struct {
 }
 
-// GetProperty input: module.avm-ptn-aiml-ai-foundry
+// GetProperty input: module.Azure/avm-ptn-aiml-ai-foundry/azurerm
 func (m AVMModule) GetProperty(propertyName string) *Property {
 	parts := strings.Split(propertyName, ".")
 	if len(parts) < 2 {

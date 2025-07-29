@@ -111,13 +111,7 @@ func CandidatesAtPos(data []byte, filename string, pos hcl.Pos, logger *log.Logg
 	var resourceName string
 	if resourceBlock.Type == "module" {
 		if v := parser.BlockAttributeLiteralValue(resourceBlock, "source"); v != nil {
-			moduleNameArr := strings.Split(*v, "/")
-			if len(moduleNameArr) < 2 {
-				logger.Printf("module source '%s' is not valid", *v)
-				return nil
-			}
-			moduleName := moduleNameArr[1]
-			resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, moduleName)
+			resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, *v)
 		}
 	} else {
 		resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, resourceBlock.Labels[0])
@@ -135,6 +129,17 @@ func CandidatesAtPos(data []byte, filename string, pos hcl.Pos, logger *log.Logg
 
 	// if the cursor is in an attribute, provide value candidates for that attribute
 	if attribute, attributePath := parser.AttributeAtPos(resourceBlock, pos); attribute != nil {
+		if resourceBlock.Type == "module" && attributePath == "source" {
+			fmt.Printf("Special case for module source attribute at %+v\n", pos)
+			// special case for module source attribute, we provide module candidates
+			editRange := lsp.Range{
+				Start: ilsp.HCLPosToLSP(pos),
+				End:   ilsp.HCLPosToLSP(pos),
+			}
+			editRange.Start.Character = 0
+			candidateList = append(candidateList, snippets.AVMTemplateCandidates(editRange)...)
+			return candidateList
+		}
 		propertyPath := fmt.Sprintf("%s.%s", resourceName, attributePath)
 		property := (*resource).GetProperty(propertyPath)
 		if property == nil {

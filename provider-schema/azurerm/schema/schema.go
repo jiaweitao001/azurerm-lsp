@@ -168,7 +168,7 @@ func (b *SchemaAttribute) GetAttributeDocLink(parentLink string) string {
 }
 
 func (b *SchemaAttribute) GetModuleAttributeDocLink() string {
-	return fmt.Sprintf(AVMAttributeDocURL, b.ResourceOrDataSourceName, strings.Split(b.AttributePath, ".")[0])
+	return fmt.Sprintf(AVMAttributeDocURL, strings.Split(b.ResourceOrDataSourceName, "/")[1], strings.Split(b.AttributePath, ".")[0])
 }
 
 func (b *SchemaAttribute) GetGitHubIssueLink() string {
@@ -176,7 +176,7 @@ func (b *SchemaAttribute) GetGitHubIssueLink() string {
 }
 
 func (b *SchemaAttribute) GetModuleGitHubIssueLink() string {
-	return fmt.Sprintf(AVMGitHubIssuesURL, b.ResourceOrDataSourceName, strings.Split(b.AttributePath, ".")[len(strings.Split(b.AttributePath, "."))-1])
+	return fmt.Sprintf(AVMGitHubAttributeIssuesURL, strings.Split(b.ResourceOrDataSourceName, "/")[1], strings.Split(b.AttributePath, ".")[len(strings.Split(b.AttributePath, "."))-1])
 }
 
 func (b *SchemaAttribute) GetRaiseGitHubIssueLink() string {
@@ -184,7 +184,7 @@ func (b *SchemaAttribute) GetRaiseGitHubIssueLink() string {
 }
 
 func (b *SchemaAttribute) GetModuleRaiseGitHubIssueLink() string {
-	return fmt.Sprintf(AVMNewGitHubIssuesURL, b.ResourceOrDataSourceName)
+	return fmt.Sprintf(AVMNewGitHubIssuesURL, strings.Split(b.ResourceOrDataSourceName, "/")[1])
 }
 
 func (b *SchemaAttribute) GetDetails() []string {

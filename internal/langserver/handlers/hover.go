@@ -83,13 +83,7 @@ func HoverAtPos(ctx context.Context, data []byte, filename string, pos hcl.Pos, 
 	var resourceName string
 	if resourceBlock.Type == "module" {
 		if v := parser.BlockAttributeLiteralValue(resourceBlock, "source"); v != nil {
-			moduleNameArr := strings.Split(*v, "/")
-			if len(moduleNameArr) < 2 {
-				logger.Printf("module source '%s' is not valid", *v)
-				return nil
-			}
-			moduleName := moduleNameArr[1]
-			resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, moduleName)
+			resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, *v)
 		}
 	} else {
 		resourceName = fmt.Sprintf("%s.%s", resourceBlock.Type, resourceBlock.Labels[0])

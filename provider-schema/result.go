@@ -261,8 +261,8 @@ func GetModuleContent(moduleName string) (string, error) {
 	return fmt.Sprintf(ModuleTemplate,
 		moduleName,
 		moduleInfo.GetModuleDocLink(),
-		moduleInfo.GetGitHubIssueLink(),
-		moduleInfo.GetRaiseGitHubIssueLink(),
+		moduleInfo.GetModuleGitHubIssueLink(),
+		moduleInfo.GetRaiseAVMGitHubIssueLink(),
 		moduleInfo.GetDocContent(),
 	), nil
 }

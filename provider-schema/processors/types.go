@@ -40,7 +40,18 @@ func (b *TerraformObject) GetResourceOrDataSourceDocLink() string {
 }
 
 func (b *TerraformObject) GetModuleDocLink() string {
-	return fmt.Sprintf(schema.AVMDocsURL, b.GetName(), schema.DefaultDocVersion)
+	moduleName := strings.Split(b.Name, "/")[1]
+	return fmt.Sprintf(schema.AVMDocsURL, moduleName, schema.DefaultDocVersion)
+}
+
+func (b *TerraformObject) GetModuleGitHubIssueLink() string {
+	moduleName := strings.Split(b.Name, "/")[1]
+	return fmt.Sprintf(schema.AVMGitHubIssuesURL, moduleName)
+}
+
+func (b *TerraformObject) GetRaiseAVMGitHubIssueLink() string {
+	moduleName := strings.Split(b.Name, "/")[1]
+	return fmt.Sprintf(schema.AVMNewGitHubIssuesURL, moduleName)
 }
 
 func (b *TerraformObject) GetGitHubIssueLink() string {

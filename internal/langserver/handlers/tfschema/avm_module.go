@@ -22,10 +22,8 @@ func (m AVMModule) GetProperty(propertyName string) *Property {
 	moduleName := parts[1]
 	path := strings.Join(parts[2:], ".")
 
-	values, err := provider_schema.GetPossibleValuesForProperty(moduleName, path, false)
-	if err != nil {
-		return nil
-	}
+	// It's OK for AVM modules to not have possible values.
+	values, _ := provider_schema.GetPossibleValuesForProperty(moduleName, path, false)
 	content, prop, err := provider_schema.GetModuleAttributeContent(moduleName, path)
 	if err != nil || prop == nil {
 		return nil

@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	lsctx "github.com/Azure/ms-terraform-lsp/internal/context"

@@ -215,6 +215,10 @@ func GetPropertyDocContent(objName string, property *schema.SchemaAttribute, isD
 		directPropertiesDescriptions = append(directPropertiesDescriptions, fmt.Sprintf(" - %s: %s", directProperty.Name, directProperty.GetDescription()))
 	}
 
+	if strings.Contains(objName, schema.AVMPrefix) {
+		return fmt.Sprintf("%s\n", propertyDescription)
+	}
+
 	return fmt.Sprintf("%s\n\n%s", propertyDescription, strings.Join(directPropertiesDescriptions, "\n"))
 }
 

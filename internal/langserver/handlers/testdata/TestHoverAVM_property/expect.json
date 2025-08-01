@@ -4,7 +4,7 @@
   "result": {
     "contents": {
       "kind": "markdown",
-      "value": "## name\n**[optional] string**\n\n[📖 Documentation](\u003chttps://github.com/Azure/terraform-azurerm-avm-res-storage-storageaccount/blob/main/README.md#-name\u003e) | [🔍 See Related Issues](\u003chttps://github.com/Azure/terraform-azurerm-avm-res-storage-storageaccount/issues?q=is:issue name\u003e) | [🐛 Raise Issue](\u003chttps://github.com/Azure/terraform-azurerm-avm-res-storage-storageaccount/issues/new?template=avm_module_issue.yml\u003e)\n\n---\n\n\n\nThe name of the resource.\n"
+      "value": "## name\n**[optional] string**\n\n[📖 Documentation](\u003chttps://github.com/Azure/terraform-azurerm-avm-res-storage-storageaccount/blob/main/README.md#-name\u003e) | [🔍 See Related Issues](\u003chttps://github.com/Azure/terraform-azurerm-avm-res-storage-storageaccount/issues?q=is:issue name\u003e) | [🐛 Raise Issue](\u003chttps://github.com/Azure/terraform-azurerm-avm-res-storage-storageaccount/issues/new?template=avm_module_issue.yml\u003e)\n\n---\n\n\n\nThe name of the resource.\n\n"
     },
     "range": {
       "start": {

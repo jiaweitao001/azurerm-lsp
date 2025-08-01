@@ -11,7 +11,7 @@
         "detail": "Possible value for node_cidr",
         "documentation": {
             "kind": "markdown",
-            "value": "## node_cidr\n**[optional] string**\n\n[📖 Documentation](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/blob/main/README.md#-node_cidr\u003e) | [🔍 See Related Issues](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/issues?q=is:issue node_cidr\u003e) | [🐛 Raise Issue](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/issues/new?template=avm_module_issue.yml\u003e)\n\n---\n\n- **Default:** `10.31.0.0/16`\n- **Possible Values:** `10.31.0.0/16`\n\n(Optional) The CIDR to use for node IPs in the Kubernetes cluster. Changing this forces a new resource to be created.\n"
+            "value": "## node_cidr\n**[optional] string**\n\n[📖 Documentation](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/blob/main/README.md#-node_cidr\u003e) | [🔍 See Related Issues](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/issues?q=is:issue node_cidr\u003e) | [🐛 Raise Issue](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/issues/new?template=avm_module_issue.yml\u003e)\n\n---\n\n- **Default:** `10.31.0.0/16`\n- **Possible Values:** `10.31.0.0/16`\n\n(Optional) The CIDR to use for node IPs in the Kubernetes cluster. Changing this forces a new resource to be created.\n\n"
         },
         "textEdit": {
             "range": {

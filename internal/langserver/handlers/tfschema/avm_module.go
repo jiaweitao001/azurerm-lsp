@@ -45,11 +45,8 @@ func (m AVMModule) GetProperty(propertyName string) *Property {
 		})
 	}
 
-	out := &Property{}
-	if prop != nil {
-		property := ToProperty(prop, content)
-		out = &property
-	}
+	property := ToProperty(prop, content)
+	out := &property
 	out.MarkdownDescription = content
 	out.ValueCandidatesFunc = FixedValueCandidatesFunc(fixedItems)
 	return out

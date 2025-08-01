@@ -4,29 +4,29 @@
   "result": {
     "isIncomplete": false,
     "items": [
-      {
-        "label": "\"AI Foundry project for agent services and AI workloads\"",
+    {
+        "label": "\"10.31.0.0/16\"",
         "labelDetails": {},
         "kind": 12,
-        "detail": "Possible value for ai_foundry_project_description",
+        "detail": "Possible value for node_cidr",
         "documentation": {
-          "kind": "markdown",
-          "value": "## ai_foundry_project_description\n**[optional] string**\n\n[📖 Documentation](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aiml-ai-foundry/blob/main/README.md#-ai_foundry_project_description\u003e) | [🔍 See Related Issues](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aiml-ai-foundry/issues?q=is:issue ai_foundry_project_description\u003e) | [🐛 Raise Issue](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aiml-ai-foundry/issues/new?template=avm_module_issue.yml\u003e)\n\n---\n\n- **Default:** `AI Foundry project for agent services and AI workloads`\n- **Possible Values:** `AI Foundry project for agent services and AI workloads`\n\nDescription for the AI Foundry project.\n"
+            "kind": "markdown",
+            "value": "## node_cidr\n**[optional] string**\n\n[📖 Documentation](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/blob/main/README.md#-node_cidr\u003e) | [🔍 See Related Issues](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/issues?q=is:issue node_cidr\u003e) | [🐛 Raise Issue](\u003chttps://github.com/Azure/terraform-azurerm-avm-ptn-aks-economy/issues/new?template=avm_module_issue.yml\u003e)\n\n---\n\n- **Default:** `10.31.0.0/16`\n- **Possible Values:** `10.31.0.0/16`\n\n(Optional) The CIDR to use for node IPs in the Kubernetes cluster. Changing this forces a new resource to be created.\n"
         },
         "textEdit": {
-          "range": {
-            "start": {
-              "line": 3,
-              "character": 34
+            "range": {
+                "start": {
+                    "line": 3,
+                    "character": 14
+                },
+                "end": {
+                    "line": 3,
+                    "character": 16
+                }
             },
-            "end": {
-              "line": 3,
-              "character": 20
-            }
-          },
-          "newText": "\"AI Foundry project for agent services and AI workloads\""
+            "newText": "\"10.31.0.0/16\""
         }
-      }
-    ]
+    }
+]
   }
 }

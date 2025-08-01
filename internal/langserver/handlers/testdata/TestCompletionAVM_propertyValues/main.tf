@@ -1,5 +1,5 @@
 module "avm" {
-  source = "Azure/avm-ptn-aiml-ai-foundry/azurerm"
+  source = "Azure/avm-ptn-aks-economy/azurerm"
 
-  ai_foundry_project_description =
+  node_cidr = 
 }

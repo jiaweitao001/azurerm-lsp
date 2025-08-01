@@ -394,7 +394,7 @@ func TestCompletionAVM_propertyValues(t *testing.T) {
 
 	ls.CallAndExpectResponse(t, &langserver.CallRequest{
 		Method:    "textDocument/completion",
-		ReqParams: buildReqParamsCompletion(4, 21, tmpDir.URI()),
+		ReqParams: buildReqParamsCompletion(4, 17, tmpDir.URI()),
 	}, string(expectRaw))
 }
 

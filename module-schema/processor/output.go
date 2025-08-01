@@ -15,10 +15,6 @@ const (
 	outputDir      = "module-schema/processor"
 )
 
-//go:embed output.json
-
-var outputJSON []byte
-
 func ProcessBatchOutput(dirPath string) ([]schema.TerraformObject, error) {
 	var terraformObjects []schema.TerraformObject
 	variablesDir := filepath.Join(dirPath, "variables")

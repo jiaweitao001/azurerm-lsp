@@ -34,6 +34,9 @@ func ProcessBatchOutput(dirPath string) ([]schema.TerraformObject, error) {
 		}
 
 		parsedBlock, err := FindFieldsFromBlock(hclBlock, objName)
+		if err != nil {
+			return fmt.Errorf("failed to find fields in block: %w", err)
+		}
 
 		// Read the example HCL file content
 		exampleFilePath := filepath.Join(examplesDir, fmt.Sprintf("%s_example.tf", objName))

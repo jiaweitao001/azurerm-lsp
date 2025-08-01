@@ -201,6 +201,11 @@ func GetPropertyDocContent(objName string, property *schema.SchemaAttribute, isD
 		return ""
 	}
 
+	if strings.Contains(objName, schema.AVMPrefix) {
+		// For AVM modules, we don't show direct properties
+		return fmt.Sprintf("%s\n", property.GetModuleDescription())
+	}
+
 	propertyDescription := property.GetDescription()
 
 	// try to get direct properties of this property
@@ -213,10 +218,6 @@ func GetPropertyDocContent(objName string, property *schema.SchemaAttribute, isD
 	var directPropertiesDescriptions []string
 	for _, directProperty := range directProperties {
 		directPropertiesDescriptions = append(directPropertiesDescriptions, fmt.Sprintf(" - %s: %s", directProperty.Name, directProperty.GetDescription()))
-	}
-
-	if strings.Contains(objName, schema.AVMPrefix) {
-		return fmt.Sprintf("%s\n", propertyDescription)
 	}
 
 	return fmt.Sprintf("%s\n\n%s", propertyDescription, strings.Join(directPropertiesDescriptions, "\n"))

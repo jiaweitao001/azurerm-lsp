@@ -157,6 +157,14 @@ func (b *SchemaAttribute) GetDescription() string {
 	return description
 }
 
+func (b *SchemaAttribute) GetModuleDescription() string {
+	if b.Content == "" {
+		return "UnDocumented"
+	}
+
+	return b.Content
+}
+
 func (b *SchemaAttribute) GetAttributeDocLink(parentLink string) string {
 	fieldParts := strings.Split(b.AttributePath, ".")
 	if len(fieldParts) == 0 {

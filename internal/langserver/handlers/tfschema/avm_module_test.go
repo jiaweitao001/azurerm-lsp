@@ -49,11 +49,11 @@ func TestAVMModule_ResourceDocumentation(t *testing.T) {
 		expected     string
 	}{
 		{
-			resourceType: "module.avm-res-compute-virtualmachine",
+			resourceType: "module.Azure/avm-res-compute-virtualmachine/azurerm",
 			expected:     `[📖 Documentation](<https://registry.terraform.io/modules/Azure/avm-res-compute-virtualmachine/azurerm/latest>)`,
 		},
 		{
-			resourceType: "module.avm-res-network-virtualnetwork",
+			resourceType: "module.Azure/avm-res-network-virtualnetwork/azurerm",
 			expected:     `[📖 Documentation](<https://registry.terraform.io/modules/Azure/avm-res-network-virtualnetwork/azurerm/latest>)`,
 		},
 	}
@@ -75,11 +75,11 @@ func TestAVMModule_ListProperties(t *testing.T) {
 		expected  []string
 	}{
 		{
-			blockPath: "module.avm-res-compute-virtualmachine",
-			expected:  []string{"account_credentials", "additional_unattend_contents", "boot_diagnostics", "data_disk_managed_disks", "diagnostic_settings", "extensions", "gallery_applications", "location", "managed_identities", "name", "network_interfaces", "os_disk", "os_type", "public_ip_configuration_details", "resource_group_name", "role_assignments", "role_assignments_system_managed_identity", "secrets", "sku_size", "winrm_listeners", "allow_extension_operations", "availability_set_resource_id", "azure_backup_configurations", "boot_diagnostics_storage_account_uri", "bypass_platform_safety_checks_on_user_schedule_enabled", "capacity_reservation_group_resource_id", "computer_name", "custom_data", "dedicated_host_group_resource_id", "dedicated_host_resource_id", "disk_controller_type", "edge_zone", "enable_automatic_updates", "enable_telemetry", "encryption_at_host_enabled", "eviction_policy", "extensions_time_budget", "hotpatching_enabled", "license_type", "lock", "maintenance_configuration_resource_ids", "max_bid_price", "patch_assessment_mode", "patch_mode", "plan", "platform_fault_domain", "priority", "provision_vm_agent", "proximity_placement_group_resource_id", "reboot_setting", "run_commands", "run_commands_secrets", "secure_boot_enabled", "shutdown_schedules", "source_image_reference", "source_image_resource_id", "tags", "termination_notification", "timeouts", "timezone", "user_data", "virtual_machine_scale_set_resource_id", "vm_additional_capabilities", "vtpm_enabled", "zone"},
+			blockPath: "module.Azure/avm-res-compute-virtualmachine/azurerm",
+			expected:  []string{"account_credentials", "additional_unattend_contents", "boot_diagnostics", "data_disk_managed_disks", "diagnostic_settings", "enable_telemetry", "extensions", "gallery_applications", "location", "managed_identities", "name", "network_interfaces", "os_disk", "os_type", "public_ip_configuration_details", "resource_group_name", "role_assignments", "role_assignments_system_managed_identity", "secrets", "sku_size", "winrm_listeners", "allow_extension_operations", "availability_set_resource_id", "azure_backup_configurations", "boot_diagnostics_storage_account_uri", "bypass_platform_safety_checks_on_user_schedule_enabled", "capacity_reservation_group_resource_id", "computer_name", "custom_data", "dedicated_host_group_resource_id", "dedicated_host_resource_id", "disk_controller_type", "edge_zone", "enable_automatic_updates", "encryption_at_host_enabled", "eviction_policy", "extensions_time_budget", "hotpatching_enabled", "license_type", "lock", "maintenance_configuration_resource_ids", "max_bid_price", "patch_assessment_mode", "patch_mode", "plan", "platform_fault_domain", "priority", "provision_vm_agent", "proximity_placement_group_resource_id", "reboot_setting", "run_commands", "run_commands_secrets", "secure_boot_enabled", "shutdown_schedules", "source_image_reference", "source_image_resource_id", "tags", "termination_notification", "timeouts", "timezone", "user_data", "virtual_machine_scale_set_resource_id", "vm_additional_capabilities", "vtpm_enabled", "zone"},
 		},
 		{
-			blockPath: "module.avm-res-compute-virtualmachine.os_disk",
+			blockPath: "module.Azure/avm-res-compute-virtualmachine/azurerm.os_disk",
 			expected:  []string{"caching", "storage_account_type", "diff_disk_settings", "disk_encryption_set_id", "disk_size_gb", "name", "secure_vm_disk_encryption_set_id", "security_encryption_type", "write_accelerator_enabled"},
 		},
 	}
@@ -108,7 +108,7 @@ func TestAVMModule_GetProperty(t *testing.T) {
 		expected     tfschema.Property
 	}{
 		{
-			propertyPath: "module.avm-res-compute-virtualmachine.location",
+			propertyPath: "module.Azure/avm-res-compute-virtualmachine/azurerm.location",
 			expected: tfschema.Property{
 				Name:     "location",
 				Modifier: "Required",
@@ -116,7 +116,7 @@ func TestAVMModule_GetProperty(t *testing.T) {
 			},
 		},
 		{
-			propertyPath: "module.avm-res-compute-virtualmachine.os_disk.caching",
+			propertyPath: "module.Azure/avm-res-compute-virtualmachine/azurerm.os_disk.caching",
 			expected: tfschema.Property{
 				Name:     "caching",
 				Modifier: "Required",

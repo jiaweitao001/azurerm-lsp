@@ -15,7 +15,7 @@ func main() {
 
 func run() error {
 	//processor.FetchRepositoryData()
-	_, err := processor.ProcessBatchOutput(processor.OutputDir)
+	_, err := processor.ProcessBatchOutput("/outputDir")
 	if err != nil {
 		return fmt.Errorf("error processing output: %v", err)
 	}
